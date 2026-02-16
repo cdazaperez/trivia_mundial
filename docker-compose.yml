@@ -9,6 +9,10 @@ services:
       - SECRET_KEY=${SECRET_KEY:-super-secret-key-change-me-in-production}
       - DATABASE_URL=sqlite:////data/trivia_mundial.db
       - CORS_ORIGINS=*
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@triviamundial.com}
+      - ADMIN_FULLNAME=${ADMIN_FULLNAME:-Administrador}
     volumes:
       - db-data:/data
     expose:

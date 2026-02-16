@@ -131,7 +131,40 @@ def seed_group_matches(db: Session):
     db.commit()
 
 
+def seed_admin(db: Session):
+    """Create admin user from environment variables if it doesn't exist."""
+    import os
+    from app.models.user import User
+    from app.core.security import get_password_hash
+
+    admin_user = os.getenv("ADMIN_USERNAME")
+    admin_pass = os.getenv("ADMIN_PASSWORD")
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@triviamundial.com")
+    admin_name = os.getenv("ADMIN_FULLNAME", "Administrador")
+
+    if not admin_user or not admin_pass:
+        return
+
+    existing = db.query(User).filter(User.username == admin_user).first()
+    if existing:
+        if not existing.is_admin:
+            existing.is_admin = True
+            db.commit()
+        return
+
+    admin = User(
+        username=admin_user,
+        email=admin_email,
+        hashed_password=get_password_hash(admin_pass),
+        full_name=admin_name,
+        is_admin=True,
+    )
+    db.add(admin)
+    db.commit()
+
+
 def seed_all(db: Session):
     """Seed all initial data."""
     seed_teams(db)
     seed_group_matches(db)
+    seed_admin(db)
