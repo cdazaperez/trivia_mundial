@@ -163,32 +163,20 @@ def force_update_teams(db: Session):
             else:
                 new_teams.append(seed_t)
 
-    # Pass 1: set all codes to temporary unique values to avoid UNIQUE conflicts
+    # Pass 1: set all names and codes to temporary unique values to avoid UNIQUE conflicts
     for db_team, _ in updates:
+        db_team.name = f"_TMP_NAME_{db_team.id}"
         db_team.code = f"_TMP_{db_team.id}"
     db.flush()
 
     # Pass 2: apply the real values
     updated = 0
     for db_team, seed_t in updates:
-        changed = False
-        if db_team.name != seed_t["name"]:
-            db_team.name = seed_t["name"]
-            changed = True
-        if db_team.code != seed_t["code"]:
-            db_team.code = seed_t["code"]
-            changed = True
-        else:
-            # Code was already correct but we changed it to _TMP, restore it
-            db_team.code = seed_t["code"]
-        if db_team.flag_emoji != seed_t["flag"]:
-            db_team.flag_emoji = seed_t["flag"]
-            changed = True
-        if db_team.group_name != seed_t["group"]:
-            db_team.group_name = seed_t["group"]
-            changed = True
-        if changed:
-            updated += 1
+        db_team.name = seed_t["name"]
+        db_team.code = seed_t["code"]
+        db_team.flag_emoji = seed_t["flag"]
+        db_team.group_name = seed_t["group"]
+        updated += 1
 
     for seed_t in new_teams:
         db.add(Team(
