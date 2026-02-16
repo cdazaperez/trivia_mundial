@@ -135,6 +135,7 @@ def force_update_teams(db: Session):
 
     Matches teams by group and position (order within group) so that
     existing team IDs and all associated predictions are preserved.
+    Uses a two-pass approach to avoid UNIQUE constraint conflicts on code.
     """
     from collections import defaultdict
 
@@ -143,10 +144,12 @@ def force_update_teams(db: Session):
     for t in TEAMS_DATA:
         seed_by_group[t["group"]].append(t)
 
-    updated = 0
+    # Build mapping: db_team -> new seed data
+    updates: list[tuple[Team, dict]] = []
+    new_teams: list[dict] = []
+
     for group_letter in sorted(seed_by_group.keys()):
         seed_teams_list = seed_by_group[group_letter]
-        # Get existing teams for this group ordered by ID (original insertion order)
         db_teams = (
             db.query(Team)
             .filter(Team.group_name == group_letter)
@@ -156,33 +159,45 @@ def force_update_teams(db: Session):
 
         for i, seed_t in enumerate(seed_teams_list):
             if i < len(db_teams):
-                # Update existing team in-place
-                db_team = db_teams[i]
-                changed = False
-                if db_team.name != seed_t["name"]:
-                    db_team.name = seed_t["name"]
-                    changed = True
-                if db_team.code != seed_t["code"]:
-                    db_team.code = seed_t["code"]
-                    changed = True
-                if db_team.flag_emoji != seed_t["flag"]:
-                    db_team.flag_emoji = seed_t["flag"]
-                    changed = True
-                if db_team.group_name != seed_t["group"]:
-                    db_team.group_name = seed_t["group"]
-                    changed = True
-                if changed:
-                    updated += 1
+                updates.append((db_teams[i], seed_t))
             else:
-                # New team in group (shouldn't normally happen)
-                new_team = Team(
-                    name=seed_t["name"],
-                    code=seed_t["code"],
-                    group_name=seed_t["group"],
-                    flag_emoji=seed_t["flag"],
-                )
-                db.add(new_team)
-                updated += 1
+                new_teams.append(seed_t)
+
+    # Pass 1: set all codes to temporary unique values to avoid UNIQUE conflicts
+    for db_team, _ in updates:
+        db_team.code = f"_TMP_{db_team.id}"
+    db.flush()
+
+    # Pass 2: apply the real values
+    updated = 0
+    for db_team, seed_t in updates:
+        changed = False
+        if db_team.name != seed_t["name"]:
+            db_team.name = seed_t["name"]
+            changed = True
+        if db_team.code != seed_t["code"]:
+            db_team.code = seed_t["code"]
+            changed = True
+        else:
+            # Code was already correct but we changed it to _TMP, restore it
+            db_team.code = seed_t["code"]
+        if db_team.flag_emoji != seed_t["flag"]:
+            db_team.flag_emoji = seed_t["flag"]
+            changed = True
+        if db_team.group_name != seed_t["group"]:
+            db_team.group_name = seed_t["group"]
+            changed = True
+        if changed:
+            updated += 1
+
+    for seed_t in new_teams:
+        db.add(Team(
+            name=seed_t["name"],
+            code=seed_t["code"],
+            group_name=seed_t["group"],
+            flag_emoji=seed_t["flag"],
+        ))
+        updated += 1
 
     db.commit()
     return updated
