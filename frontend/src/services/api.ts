@@ -38,6 +38,18 @@ export const register = (data: {
 
 export const getMe = () => api.get("/auth/me");
 
+export const changePassword = (data: {
+  current_password: string;
+  new_password: string;
+}) => api.put("/auth/change-password", data);
+
+export const adminResetPassword = (data: {
+  username: string;
+  new_password: string;
+}) => api.put("/auth/admin/reset-password", data);
+
+export const listUsers = () => api.get("/auth/users");
+
 // Matches
 export const getMatches = (params?: {
   phase?: string;
@@ -90,5 +102,8 @@ export const getLeaderboard = (phase?: string) =>
   api.get("/leaderboard/", { params: phase ? { phase } : {} });
 
 export const getPhaseWinners = () => api.get("/leaderboard/phase-winners");
+
+// Admin
+export const resetAllResults = () => api.post("/matches/reset-all");
 
 export default api;

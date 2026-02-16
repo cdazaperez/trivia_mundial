@@ -17,6 +17,15 @@ from app.schemas.tournament import (
 router = APIRouter(prefix="/api/predictions", tags=["predictions"])
 
 
+def check_admin_cannot_predict(user: User):
+    """Admin cannot participate in the contest."""
+    if user.is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="El administrador no puede participar en el concurso de pronósticos.",
+        )
+
+
 def check_predictions_locked():
     """Check if predictions are locked (24h before World Cup starts)."""
     lock_date = datetime.strptime(WORLD_CUP_START_DATE, "%Y-%m-%d").replace(tzinfo=timezone.utc)
@@ -50,6 +59,8 @@ def create_match_prediction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    check_admin_cannot_predict(current_user)
+
     match = db.query(Match).filter(Match.id == prediction.match_id).first()
     if not match:
         raise HTTPException(status_code=404, detail="Partido no encontrado")
@@ -141,6 +152,7 @@ def create_group_prediction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    check_admin_cannot_predict(current_user)
     check_predictions_locked()
 
     # Validate teams belong to the group
@@ -199,6 +211,7 @@ def create_bonus_prediction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    check_admin_cannot_predict(current_user)
     check_predictions_locked()
 
     valid_types = ["champion", "runner_up", "top_scorer", "mvp"]

@@ -19,7 +19,7 @@ def get_leaderboard(
     db: Session = Depends(get_db),
     _current_user: User = Depends(get_current_user),
 ):
-    users = db.query(User).filter(User.is_active == True).all()
+    users = db.query(User).filter(User.is_active == True, User.is_admin == False).all()
     entries = []
 
     for user in users:
@@ -88,7 +88,7 @@ def get_phase_winners(
             continue
 
         # Get leaderboard for this phase
-        users = db.query(User).filter(User.is_active == True).all()
+        users = db.query(User).filter(User.is_active == True, User.is_admin == False).all()
         phase_entries = []
 
         for user in users:

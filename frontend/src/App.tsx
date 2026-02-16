@@ -10,6 +10,7 @@ import Bonus from "./pages/Bonus";
 import Predictions from "./pages/Predictions";
 import Leaderboard from "./pages/Leaderboard";
 import Admin from "./pages/Admin";
+import ChangePassword from "./pages/ChangePassword";
 import "./App.css";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -42,6 +43,7 @@ function AppRoutes() {
           <Route path="/bonus" element={<PrivateRoute><Bonus /></PrivateRoute>} />
           <Route path="/predictions" element={<PrivateRoute><Predictions /></PrivateRoute>} />
           <Route path="/leaderboard" element={<PrivateRoute><Leaderboard /></PrivateRoute>} />
+          <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />
           <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

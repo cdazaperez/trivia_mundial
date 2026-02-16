@@ -18,15 +18,22 @@ export default function Navbar() {
         <Link to="/">Trivia Mundial 2026</Link>
       </div>
       <div className="navbar-links">
-        <Link to="/matches">Partidos</Link>
-        <Link to="/predictions">Mis Pronósticos</Link>
-        <Link to="/groups">Grupos</Link>
-        <Link to="/bonus">Apuestas Bonus</Link>
+        {!user.is_admin && (
+          <>
+            <Link to="/matches">Partidos</Link>
+            <Link to="/predictions">Mis Pronósticos</Link>
+            <Link to="/groups">Grupos</Link>
+            <Link to="/bonus">Apuestas Bonus</Link>
+          </>
+        )}
         <Link to="/leaderboard">Tabla de Posiciones</Link>
         {user.is_admin && <Link to="/admin">Admin</Link>}
       </div>
       <div className="navbar-user">
         <span>{user.full_name}</span>
+        <Link to="/change-password" className="btn btn-sm">
+          Contraseña
+        </Link>
         <button onClick={handleLogout} className="btn btn-sm">
           Salir
         </button>

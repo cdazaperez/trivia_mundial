@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.core.security import get_current_user, get_admin_user
 from app.models.user import User
-from app.models.tournament import Match, Phase, Team
+from app.models.tournament import Match, MatchPrediction, GroupPrediction, BonusPrediction, Phase, Team
 from app.schemas.tournament import MatchResponse, MatchResultUpdate
 from app.services.scoring import calculate_points_for_match
 
@@ -64,6 +64,26 @@ def update_match_result(
 
     db.refresh(match)
     return match
+
+
+@router.post("/reset-all")
+def reset_all_results(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Reset all match results and points (for testing purposes)."""
+    # Reset all match results
+    db.query(Match).update({
+        Match.home_score: None,
+        Match.away_score: None,
+        Match.is_finished: False,
+    })
+    # Reset all prediction points
+    db.query(MatchPrediction).update({MatchPrediction.points_earned: 0})
+    db.query(GroupPrediction).update({GroupPrediction.points_earned: 0})
+    db.query(BonusPrediction).update({BonusPrediction.points_earned: 0})
+    db.commit()
+    return {"detail": "Todos los resultados y puntos han sido reiniciados"}
 
 
 @router.get("/phases/list", response_model=list[str])

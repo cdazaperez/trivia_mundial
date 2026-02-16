@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.security import verify_password, get_password_hash, create_access_token, get_current_user
+from app.core.security import verify_password, get_password_hash, create_access_token, get_current_user, get_admin_user
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, Token, LoginRequest
+from app.schemas.user import UserCreate, UserResponse, Token, LoginRequest, PasswordChange, AdminPasswordReset
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -51,3 +51,50 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.put("/change-password")
+def change_password(
+    data: PasswordChange,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(data.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="La contraseña actual es incorrecta")
+
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="La nueva contraseña debe tener al menos 6 caracteres")
+
+    current_user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"detail": "Contraseña actualizada correctamente"}
+
+
+@router.put("/admin/reset-password")
+def admin_reset_password(
+    data: AdminPasswordReset,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    user = db.query(User).filter(User.username == data.username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if user.is_admin:
+        raise HTTPException(status_code=400, detail="No se puede resetear la contraseña de otro administrador")
+
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="La nueva contraseña debe tener al menos 6 caracteres")
+
+    user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"detail": f"Contraseña de {data.username} reseteada correctamente"}
+
+
+@router.get("/users", response_model=list[UserResponse])
+def list_users(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """List all non-admin users (for admin password reset dropdown)."""
+    return db.query(User).filter(User.is_admin == False).order_by(User.username).all()
