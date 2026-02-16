@@ -29,7 +29,7 @@ services:
     container_name: trivia-frontend
     restart: unless-stopped
     ports:
-      - "0.0.0.0:${APP_PORT:-80}:80"
+      - "0.0.0.0:${APP_PORT:-82}:80"
     depends_on:
       backend:
         condition: service_healthy
