@@ -7,9 +7,118 @@ from app.models.user import User
 from app.models.tournament import Match, MatchPrediction, GroupPrediction, BonusPrediction, Phase, Team
 from app.schemas.tournament import MatchResponse, MatchResultUpdate
 from app.services.scoring import calculate_points_for_match
+from app.services.standings import (
+    calculate_group_standings,
+    get_all_group_standings,
+    get_best_third_place_teams,
+)
+from app.services.knockout import (
+    get_knockout_status,
+    PHASE_GENERATORS,
+)
 
 router = APIRouter(prefix="/api/matches", tags=["matches"])
 
+
+# --- Standings endpoints (BEFORE /{match_id} to avoid route conflict) ---
+
+@router.get("/standings/")
+def get_all_standings(
+    db: Session = Depends(get_db),
+    _current_user: User = Depends(get_current_user),
+):
+    """Get standings for all 12 groups."""
+    all_standings = get_all_group_standings(db)
+    return [
+        {"group_name": group, "standings": standings}
+        for group, standings in sorted(all_standings.items())
+    ]
+
+
+@router.get("/standings/{group_name}")
+def get_group_standings_endpoint(
+    group_name: str,
+    db: Session = Depends(get_db),
+    _current_user: User = Depends(get_current_user),
+):
+    """Get standings for a specific group."""
+    group_name = group_name.upper()
+    if group_name not in "ABCDEFGHIJKL":
+        raise HTTPException(status_code=400, detail="Grupo inválido")
+    standings = calculate_group_standings(db, group_name)
+    total = db.query(Match).filter(
+        Match.phase == Phase.GROUP, Match.group_name == group_name
+    ).count()
+    finished = db.query(Match).filter(
+        Match.phase == Phase.GROUP, Match.group_name == group_name, Match.is_finished == True
+    ).count()
+    return {
+        "group_name": group_name,
+        "standings": standings,
+        "all_matches_finished": total > 0 and total == finished,
+    }
+
+
+@router.get("/third-place-ranking")
+def get_third_place_ranking_endpoint(
+    db: Session = Depends(get_db),
+    _current_user: User = Depends(get_current_user),
+):
+    """Get ranking of all third-place teams."""
+    return get_best_third_place_teams(db)
+
+
+@router.get("/knockout-status")
+def get_knockout_status_endpoint(
+    db: Session = Depends(get_db),
+    _current_user: User = Depends(get_current_user),
+):
+    """Get the status of each knockout phase."""
+    return get_knockout_status(db)
+
+
+@router.post("/generate-knockout/{phase}")
+def generate_knockout_round(
+    phase: str,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Generate knockout round matches. Admin only."""
+    generator = PHASE_GENERATORS.get(phase)
+    if not generator:
+        valid = ", ".join(PHASE_GENERATORS.keys())
+        raise HTTPException(
+            status_code=400,
+            detail=f"Fase inválida. Opciones válidas: {valid}",
+        )
+
+    try:
+        matches = generator(db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {
+        "phase": phase,
+        "matches_created": len(matches),
+        "message": f"Se generaron {len(matches)} partidos para {phase}",
+    }
+
+
+@router.post("/reseed")
+def reseed_endpoint(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Re-seed teams and group matches from scratch. Only if no predictions exist."""
+    from app.services.seed_data import reseed_all
+    try:
+        reseed_all(db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"detail": "Equipos y partidos re-seedeados correctamente"}
+
+
+# --- Standard match endpoints ---
 
 @router.get("/", response_model=list[MatchResponse])
 def get_matches(
@@ -29,6 +138,20 @@ def get_matches(
     if matchday:
         query = query.filter(Match.matchday == matchday)
     return query.order_by(Match.match_date, Match.match_number).all()
+
+
+@router.get("/phases/list", response_model=list[str])
+def get_phases(_current_user: User = Depends(get_current_user)):
+    return [p.value for p in Phase]
+
+
+@router.get("/teams/all", response_model=list[dict])
+def get_all_teams(db: Session = Depends(get_db), _current_user: User = Depends(get_current_user)):
+    teams = db.query(Team).order_by(Team.group_name, Team.name).all()
+    return [
+        {"id": t.id, "name": t.name, "code": t.code, "group_name": t.group_name, "flag_emoji": t.flag_emoji}
+        for t in teams
+    ]
 
 
 @router.get("/{match_id}", response_model=MatchResponse)
@@ -72,29 +195,27 @@ def reset_all_results(
     _admin: User = Depends(get_admin_user),
 ):
     """Reset all match results and points (for testing purposes)."""
-    # Reset all match results
-    db.query(Match).update({
+    # Delete predictions on knockout matches (they will be regenerated)
+    knockout_match_ids = [
+        m.id for m in db.query(Match).filter(Match.phase != Phase.GROUP).all()
+    ]
+    if knockout_match_ids:
+        db.query(MatchPrediction).filter(
+            MatchPrediction.match_id.in_(knockout_match_ids)
+        ).delete(synchronize_session="fetch")
+
+    # Delete knockout matches entirely
+    db.query(Match).filter(Match.phase != Phase.GROUP).delete()
+
+    # Reset group match results
+    db.query(Match).filter(Match.phase == Phase.GROUP).update({
         Match.home_score: None,
         Match.away_score: None,
         Match.is_finished: False,
     })
-    # Reset all prediction points
+    # Reset all remaining prediction points
     db.query(MatchPrediction).update({MatchPrediction.points_earned: 0})
     db.query(GroupPrediction).update({GroupPrediction.points_earned: 0})
     db.query(BonusPrediction).update({BonusPrediction.points_earned: 0})
     db.commit()
     return {"detail": "Todos los resultados y puntos han sido reiniciados"}
-
-
-@router.get("/phases/list", response_model=list[str])
-def get_phases(_current_user: User = Depends(get_current_user)):
-    return [p.value for p in Phase]
-
-
-@router.get("/teams/all", response_model=list[dict])
-def get_all_teams(db: Session = Depends(get_db), _current_user: User = Depends(get_current_user)):
-    teams = db.query(Team).order_by(Team.group_name, Team.name).all()
-    return [
-        {"id": t.id, "name": t.name, "code": t.code, "group_name": t.group_name, "flag_emoji": t.flag_emoji}
-        for t in teams
-    ]

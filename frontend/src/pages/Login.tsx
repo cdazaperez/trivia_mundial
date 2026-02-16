@@ -25,8 +25,14 @@ export default function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <div className="auth-mascots">
+          <div className="mascot mascot-maple">🦌<span>Maple</span></div>
+          <div className="mascot mascot-zayu">🐆<span>Zayu</span></div>
+          <div className="mascot mascot-clutch">🦅<span>Clutch</span></div>
+        </div>
         <h1>Trivia Mundial 2026</h1>
-        <h2>Iniciar Sesión</h2>
+        <p className="auth-subtitle">FIFA World Cup Canada/Mexico/USA</p>
+        <h2>Iniciar Sesion</h2>
         {error && <div className="error-msg">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">

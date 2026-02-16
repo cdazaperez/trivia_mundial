@@ -105,5 +105,12 @@ export const getPhaseWinners = () => api.get("/leaderboard/phase-winners");
 
 // Admin
 export const resetAllResults = () => api.post("/matches/reset-all");
+export const reseedData = () => api.post("/matches/reseed");
+
+// Standings & Knockout
+export const getKnockoutStatus = () => api.get("/matches/knockout-status");
+export const generateKnockoutRound = (phase: string) =>
+  api.post(`/matches/generate-knockout/${phase}`);
+export const getGroupStandings = () => api.get("/matches/standings/");
 
 export default api;

@@ -1,26 +1,73 @@
 import { useState, useEffect } from "react";
-import { getMatches, createPrediction, getMyPredictions } from "../services/api";
+import {
+  getMatches,
+  createPrediction,
+  getMyPredictions,
+  getKnockoutStatus,
+} from "../services/api";
 import { Match, Prediction } from "../types";
 
-const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+const GROUPS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
+
+const PHASE_TABS = [
+  { key: "group", label: "Fase de Grupos" },
+  { key: "round_of_32", label: "32avos" },
+  { key: "round_of_16", label: "Octavos" },
+  { key: "quarter_final", label: "Cuartos" },
+  { key: "semi_final", label: "Semis" },
+  { key: "third_place", label: "3er Puesto" },
+  { key: "final", label: "Final" },
+];
 
 export default function Matches() {
   const [matches, setMatches] = useState<Match[]>([]);
-  const [predictions, setPredictions] = useState<Record<number, Prediction>>({});
+  const [predictions, setPredictions] = useState<Record<number, Prediction>>(
+    {}
+  );
+  const [selectedPhase, setSelectedPhase] = useState<string>("group");
   const [selectedGroup, setSelectedGroup] = useState<string>("A");
-  const [scores, setScores] = useState<Record<number, { home: string; away: string }>>({});
+  const [scores, setScores] = useState<
+    Record<number, { home: string; away: string }>
+  >({});
   const [saving, setSaving] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
+  const [availablePhases, setAvailablePhases] = useState<string[]>(["group"]);
+
+  useEffect(() => {
+    loadKnockoutStatus();
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, [selectedGroup]);
+  }, [selectedPhase, selectedGroup]);
+
+  const loadKnockoutStatus = async () => {
+    try {
+      const res = await getKnockoutStatus();
+      const status = res.data;
+      const phases = ["group"];
+      if (status.round_of_32?.exists) phases.push("round_of_32");
+      if (status.round_of_16?.exists) phases.push("round_of_16");
+      if (status.quarter_final?.exists) phases.push("quarter_final");
+      if (status.semi_final?.exists) phases.push("semi_final");
+      if (status.third_place?.exists) phases.push("third_place");
+      if (status.final?.exists) phases.push("final");
+      setAvailablePhases(phases);
+    } catch {
+      // fallback
+    }
+  };
 
   const loadData = async () => {
     try {
+      const params: any =
+        selectedPhase === "group"
+          ? { group: selectedGroup, phase: "group" }
+          : { phase: selectedPhase };
+
       const [matchRes, predRes] = await Promise.all([
-        getMatches({ group: selectedGroup, phase: "group" }),
-        getMyPredictions("group"),
+        getMatches(params),
+        getMyPredictions(selectedPhase),
       ]);
       setMatches(matchRes.data);
       const predMap: Record<number, Prediction> = {};
@@ -55,7 +102,7 @@ export default function Matches() {
         home_score: parseInt(s.home),
         away_score: parseInt(s.away),
       });
-      setMsg("Pronóstico guardado");
+      setMsg("Pronostico guardado");
       loadData();
     } catch (err: any) {
       setMsg(err.response?.data?.detail || "Error al guardar");
@@ -73,23 +120,48 @@ export default function Matches() {
     });
   };
 
+  const phaseLabel =
+    PHASE_TABS.find((p) => p.key === selectedPhase)?.label || "Partidos";
+
   return (
     <div className="page">
-      <h2>Partidos - Fase de Grupos</h2>
+      <h2>Partidos</h2>
 
-      <div className="group-tabs">
-        {GROUPS.map((g) => (
+      {/* Phase tabs */}
+      <div className="phase-tabs">
+        {PHASE_TABS.filter((p) => availablePhases.includes(p.key)).map((p) => (
           <button
-            key={g}
-            className={`tab ${selectedGroup === g ? "active" : ""}`}
-            onClick={() => setSelectedGroup(g)}
+            key={p.key}
+            className={`tab ${selectedPhase === p.key ? "active" : ""}`}
+            onClick={() => setSelectedPhase(p.key)}
           >
-            Grupo {g}
+            {p.label}
           </button>
         ))}
       </div>
 
+      {/* Group sub-tabs (only for group phase) */}
+      {selectedPhase === "group" && (
+        <div className="group-tabs">
+          {GROUPS.map((g) => (
+            <button
+              key={g}
+              className={`tab tab-sm ${selectedGroup === g ? "active" : ""}`}
+              onClick={() => setSelectedGroup(g)}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+      )}
+
       {msg && <div className="success-msg">{msg}</div>}
+
+      {matches.length === 0 && (
+        <p className="hint" style={{ textAlign: "center", marginTop: "2rem" }}>
+          No hay partidos disponibles para {phaseLabel}.
+        </p>
+      )}
 
       <div className="matches-list">
         {matches.map((match) => {
@@ -101,7 +173,12 @@ export default function Matches() {
               key={match.id}
               className={`match-card ${match.is_finished ? "finished" : ""}`}
             >
-              <div className="match-date">{formatDate(match.match_date)}</div>
+              <div className="match-date">
+                {selectedPhase !== "group" && (
+                  <span className="match-number">#{match.match_number} </span>
+                )}
+                {formatDate(match.match_date)}
+              </div>
               <div className="match-teams">
                 <div className="team home">
                   <span className="flag">{match.home_team?.flag_emoji}</span>
@@ -114,8 +191,11 @@ export default function Matches() {
                       {match.home_score} - {match.away_score}
                     </span>
                     {pred && (
-                      <span className={`points ${pred.points_earned > 0 ? "earned" : ""}`}>
-                        Tu pronóstico: {pred.home_score}-{pred.away_score} ({pred.points_earned} pts)
+                      <span
+                        className={`points ${pred.points_earned > 0 ? "earned" : ""}`}
+                      >
+                        Tu pronostico: {pred.home_score}-{pred.away_score} (
+                        {pred.points_earned} pts)
                       </span>
                     )}
                   </div>

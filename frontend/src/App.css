@@ -99,7 +99,15 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--primary) 0%, #0d2818 100%);
+  background: linear-gradient(135deg, #FF0000 0%, #006847 33%, #002868 66%, #1a1a2e 100%);
+  background-size: 400% 400%;
+  animation: authGradient 12s ease infinite;
+}
+
+@keyframes authGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .auth-card {
@@ -107,8 +115,47 @@ body {
   padding: 2.5rem;
   border-radius: var(--radius);
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.auth-mascots {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.mascot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 2.5rem;
+  line-height: 1;
+  transition: transform 0.3s;
+}
+
+.mascot:hover { transform: scale(1.15); }
+
+.mascot span {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0.25rem;
+}
+
+.mascot-maple span { color: #FF0000; }
+.mascot-zayu span { color: #006847; }
+.mascot-clutch span { color: #002868; }
+
+.auth-subtitle {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
 }
 
 .auth-card h1 {
@@ -643,6 +690,22 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   border: 1px solid var(--border);
 }
+
+/* === KNOCKOUT BUTTONS === */
+.knockout-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.knockout-buttons .btn { font-size: 0.8rem; }
+
+/* === SMALL TABS === */
+.tab-sm { padding: 0.25rem 0.6rem !important; font-size: 0.75rem !important; }
+
+/* === MATCH NUMBER === */
+.match-number { font-weight: 700; color: var(--primary); }
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
