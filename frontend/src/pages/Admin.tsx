@@ -6,6 +6,7 @@ import {
   listUsers,
   resetAllResults,
   reseedData,
+  updateTeams,
   getKnockoutStatus,
   generateKnockoutRound,
 } from "../services/api";
@@ -61,6 +62,10 @@ export default function Admin() {
   const [knockoutStatus, setKnockoutStatus] = useState<any>(null);
   const [knockoutMsg, setKnockoutMsg] = useState("");
   const [generating, setGenerating] = useState(false);
+
+  // Update teams
+  const [updateTeamsMsg, setUpdateTeamsMsg] = useState("");
+  const [updatingTeams, setUpdatingTeams] = useState(false);
 
   // Reseed
   const [showReseedConfirm, setShowReseedConfirm] = useState(false);
@@ -182,6 +187,19 @@ export default function Admin() {
     setGenerating(false);
   };
 
+  const handleUpdateTeams = async () => {
+    setUpdatingTeams(true);
+    setUpdateTeamsMsg("");
+    try {
+      const res = await updateTeams();
+      setUpdateTeamsMsg(res.data.detail);
+      loadMatches();
+    } catch (err: any) {
+      setUpdateTeamsMsg(err.response?.data?.detail || "Error al actualizar equipos");
+    }
+    setUpdatingTeams(false);
+  };
+
   const handleReseed = async () => {
     try {
       const res = await reseedData();
@@ -267,6 +285,23 @@ export default function Admin() {
             Resetear
           </button>
         </div>
+      </div>
+
+      {/* === UPDATE TEAMS === */}
+      <div className="admin-section">
+        <h3>Actualizar Equipos</h3>
+        <p className="hint">
+          Actualiza nombres, codigos y banderas de los equipos sin borrar pronosticos.
+          Util para reemplazar equipos de repechaje una vez confirmados.
+        </p>
+        {updateTeamsMsg && <div className="success-msg">{updateTeamsMsg}</div>}
+        <button
+          className="btn btn-primary"
+          onClick={handleUpdateTeams}
+          disabled={updatingTeams}
+        >
+          {updatingTeams ? "Actualizando..." : "Actualizar Equipos"}
+        </button>
       </div>
 
       {/* === RESET / RESEED === */}

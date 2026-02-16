@@ -104,6 +104,17 @@ def generate_knockout_round(
     }
 
 
+@router.post("/update-teams")
+def update_teams_endpoint(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Update team names/codes/flags in-place. Preserves predictions."""
+    from app.services.seed_data import force_update_teams
+    updated = force_update_teams(db)
+    return {"detail": f"Se actualizaron {updated} equipos correctamente"}
+
+
 @router.post("/reseed")
 def reseed_endpoint(
     db: Session = Depends(get_db),
