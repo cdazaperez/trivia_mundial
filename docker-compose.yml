@@ -8,7 +8,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY:-super-secret-key-change-me-in-production}
       - DATABASE_URL=sqlite:////data/trivia_mundial.db
-      - CORS_ORIGINS=http://localhost,http://localhost:80,http://localhost:3000
+      - CORS_ORIGINS=*
     volumes:
       - db-data:/data
     expose:
@@ -25,7 +25,7 @@ services:
     container_name: trivia-frontend
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-80}:80"
+      - "0.0.0.0:${APP_PORT:-80}:80"
     depends_on:
       backend:
         condition: service_healthy
