@@ -233,6 +233,49 @@ export default function Admin() {
         <p className="hint">
           Genera los partidos de la siguiente fase una vez completada la fase anterior.
         </p>
+
+        {knockoutStatus && !knockoutStatus.group_phase_complete && (
+          <div style={{
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: "8px",
+            padding: "0.75rem 1rem",
+            marginBottom: "1rem",
+            fontSize: "0.9rem",
+            color: "#991b1b",
+          }}>
+            <strong>Fase de grupos incompleta:</strong> {knockoutStatus.group_finished}/{knockoutStatus.group_total} partidos finalizados.
+            {knockoutStatus.unfinished_matches?.length > 0 && (
+              <details style={{ marginTop: "0.5rem" }}>
+                <summary style={{ cursor: "pointer" }}>
+                  Ver {knockoutStatus.unfinished_matches.length} partido(s) sin resultado
+                </summary>
+                <ul style={{ margin: "0.5rem 0 0 1rem", padding: 0 }}>
+                  {knockoutStatus.unfinished_matches.map((m: any) => (
+                    <li key={m.match_number}>
+                      #{m.match_number} Grupo {m.group}: {m.home} vs {m.away}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        )}
+
+        {knockoutStatus?.group_phase_complete && !isPhaseGenerated("round_of_32") && (
+          <div style={{
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+            borderRadius: "8px",
+            padding: "0.75rem 1rem",
+            marginBottom: "1rem",
+            fontSize: "0.9rem",
+            color: "#166534",
+          }}>
+            <strong>Fase de grupos completa.</strong> Ya puedes generar los 32avos de final.
+          </div>
+        )}
+
         {knockoutMsg && <div className="success-msg">{knockoutMsg}</div>}
 
         <div className="knockout-buttons">

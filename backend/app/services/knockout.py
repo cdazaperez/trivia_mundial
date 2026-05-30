@@ -199,8 +199,36 @@ def get_knockout_status(db: Session) -> dict:
             "expected": expected_count,
         }
 
+    group_total = db.query(Match).filter(Match.phase == Phase.GROUP).count()
+    group_finished = db.query(Match).filter(
+        Match.phase == Phase.GROUP, Match.is_finished == True
+    ).count()
+
+    unfinished_matches = []
+    if group_total != group_finished:
+        from sqlalchemy.orm import joinedload
+        unfinished = (
+            db.query(Match)
+            .options(joinedload(Match.home_team), joinedload(Match.away_team))
+            .filter(Match.phase == Phase.GROUP, Match.is_finished != True)
+            .order_by(Match.match_number)
+            .all()
+        )
+        unfinished_matches = [
+            {
+                "match_number": m.match_number,
+                "group": m.group_name,
+                "home": m.home_team.name if m.home_team else "?",
+                "away": m.away_team.name if m.away_team else "?",
+            }
+            for m in unfinished
+        ]
+
     return {
-        "group_phase_complete": are_all_group_matches_finished(db),
+        "group_phase_complete": group_total > 0 and group_total == group_finished,
+        "group_total": group_total,
+        "group_finished": group_finished,
+        "unfinished_matches": unfinished_matches,
         "round_of_32": phase_status(Phase.ROUND_OF_32, 16),
         "round_of_16": phase_status(Phase.ROUND_OF_16, 8),
         "quarter_final": phase_status(Phase.QUARTER_FINAL, 4),
