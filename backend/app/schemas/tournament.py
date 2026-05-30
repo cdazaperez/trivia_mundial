@@ -21,6 +21,8 @@ class MatchResponse(BaseModel):
     away_team: TeamResponse | None
     home_score: int | None
     away_score: int | None
+    home_penalties: int | None = None
+    away_penalties: int | None = None
     match_date: datetime
     venue: str | None
     is_finished: bool
@@ -32,6 +34,8 @@ class MatchResponse(BaseModel):
 class MatchResultUpdate(BaseModel):
     home_score: int
     away_score: int
+    home_penalties: int | None = None
+    away_penalties: int | None = None
 
 
 class PredictionCreate(BaseModel):

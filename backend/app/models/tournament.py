@@ -37,6 +37,8 @@ class Match(Base):
     away_team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
     home_score = Column(Integer, nullable=True)  # Actual result
     away_score = Column(Integer, nullable=True)
+    home_penalties = Column(Integer, nullable=True)
+    away_penalties = Column(Integer, nullable=True)
     match_date = Column(DateTime, nullable=False)
     venue = Column(String(200), nullable=True)
     is_finished = Column(Boolean, default=False)

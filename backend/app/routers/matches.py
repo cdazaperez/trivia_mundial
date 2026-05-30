@@ -223,8 +223,25 @@ def update_match_result(
     if not match:
         raise HTTPException(status_code=404, detail="Partido no encontrado")
 
+    is_knockout = match.phase != Phase.GROUP
+    is_draw = result.home_score == result.away_score
+
+    if is_knockout and is_draw:
+        if result.home_penalties is None or result.away_penalties is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Partido eliminatorio empatado: debes ingresar el resultado de penales.",
+            )
+        if result.home_penalties == result.away_penalties:
+            raise HTTPException(
+                status_code=400,
+                detail="Los penales no pueden terminar empatados.",
+            )
+
     match.home_score = result.home_score
     match.away_score = result.away_score
+    match.home_penalties = result.home_penalties if is_knockout else None
+    match.away_penalties = result.away_penalties if is_knockout else None
     match.is_finished = True
     db.commit()
 
@@ -311,6 +328,8 @@ def reset_all_results(
     db.query(Match).filter(Match.phase == Phase.GROUP).update({
         Match.home_score: None,
         Match.away_score: None,
+        Match.home_penalties: None,
+        Match.away_penalties: None,
         Match.is_finished: False,
     })
     # Reset all remaining prediction points

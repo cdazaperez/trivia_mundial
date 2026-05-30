@@ -163,27 +163,28 @@ def _get_match_winner(db: Session, match_number: int) -> int:
         return match.home_team_id
     elif match.away_score > match.home_score:
         return match.away_team_id
+    elif match.home_penalties is not None and match.away_penalties is not None:
+        if match.home_penalties > match.away_penalties:
+            return match.home_team_id
+        elif match.away_penalties > match.home_penalties:
+            return match.away_team_id
+        raise ValueError(
+            f"Partido #{match_number}: los penales no pueden terminar empatados."
+        )
     else:
         raise ValueError(
             f"Partido #{match_number} terminó empatado. "
-            "Ingresa el resultado final después de penales."
+            "Ingresa el resultado de penales."
         )
 
 
 def _get_match_loser(db: Session, match_number: int) -> int:
     """Get the losing team_id from a finished match."""
+    winner = _get_match_winner(db, match_number)
     match = db.query(Match).filter(Match.match_number == match_number).first()
-    if not match or not match.is_finished:
-        raise ValueError(f"Partido #{match_number} no está finalizado")
-    if match.home_score > match.away_score:
+    if winner == match.home_team_id:
         return match.away_team_id
-    elif match.away_score > match.home_score:
-        return match.home_team_id
-    else:
-        raise ValueError(
-            f"Partido #{match_number} terminó empatado. "
-            "Ingresa el resultado final después de penales."
-        )
+    return match.home_team_id
 
 
 def get_knockout_status(db: Session) -> dict:

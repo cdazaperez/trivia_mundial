@@ -3,12 +3,23 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from sqlalchemy import inspect, text
+
 from app.core.database import engine, Base, SessionLocal
 from app.routers import auth, matches, predictions, leaderboard
 from app.services.seed_data import seed_all
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+
+# Add new columns if missing (lightweight migration for SQLite)
+with engine.connect() as conn:
+    columns = [col["name"] for col in inspect(engine).get_columns("matches")]
+    if "home_penalties" not in columns:
+        conn.execute(text("ALTER TABLE matches ADD COLUMN home_penalties INTEGER"))
+    if "away_penalties" not in columns:
+        conn.execute(text("ALTER TABLE matches ADD COLUMN away_penalties INTEGER"))
+    conn.commit()
 
 app = FastAPI(
     title="Trivia Mundial 2026",

@@ -197,11 +197,15 @@ export default function Matches() {
         {matches.map((match) => {
           const pred = predictions[match.id];
           const s = scores[match.id] || { home: "", away: "" };
+          const matchTime = new Date(match.match_date).getTime();
+          const now = Date.now();
+          const isLocked = !match.is_finished && now >= matchTime - 60 * 60 * 1000;
+          const hasPenalties = match.home_penalties != null && match.away_penalties != null;
 
           return (
             <div
               key={match.id}
-              className={`match-card ${match.is_finished ? "finished" : ""}`}
+              className={`match-card ${match.is_finished ? "finished" : ""} ${isLocked ? "locked" : ""}`}
             >
               <div className="match-date">
                 <span className="match-number">#{match.match_number} </span>
@@ -209,6 +213,11 @@ export default function Matches() {
                   <span>Grupo {match.group_name} &middot; </span>
                 )}
                 {formatDate(match.match_date)}
+                {isLocked && (
+                  <span style={{ marginLeft: "0.5rem", color: "#dc2626", fontSize: "0.8rem" }}>
+                    Bloqueado
+                  </span>
+                )}
               </div>
               <div className="match-teams">
                 <div className="team home">
@@ -221,12 +230,28 @@ export default function Matches() {
                     <span className="score">
                       {match.home_score} - {match.away_score}
                     </span>
+                    {hasPenalties && (
+                      <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                        (Pen: {match.home_penalties}-{match.away_penalties})
+                      </span>
+                    )}
                     {pred && (
                       <span
                         className={`points ${pred.points_earned > 0 ? "earned" : ""}`}
                       >
-                        Tu pronostico: {pred.home_score}-{pred.away_score} (
+                        Tu pronóstico: {pred.home_score}-{pred.away_score} (
                         {pred.points_earned} pts)
+                      </span>
+                    )}
+                  </div>
+                ) : isLocked ? (
+                  <div className="match-score-final">
+                    <span style={{ color: "#dc2626", fontSize: "0.85rem" }}>
+                      Pronóstico cerrado
+                    </span>
+                    {pred && (
+                      <span className="points">
+                        Tu pronóstico: {pred.home_score}-{pred.away_score}
                       </span>
                     )}
                   </div>

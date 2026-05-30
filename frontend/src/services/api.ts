@@ -61,7 +61,7 @@ export const getMatch = (id: number) => api.get(`/matches/${id}`);
 
 export const updateMatchResult = (
   id: number,
-  data: { home_score: number; away_score: number }
+  data: { home_score: number; away_score: number; home_penalties?: number; away_penalties?: number }
 ) => api.put(`/matches/${id}/result`, data);
 
 export const getTeams = () => api.get("/matches/teams/all");

@@ -44,7 +44,7 @@ const ADMIN_PHASE_FILTER = [
 export default function Admin() {
   const { user } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
-  const [scores, setScores] = useState<Record<number, { home: string; away: string }>>({});
+  const [scores, setScores] = useState<Record<number, { home: string; away: string; homePen: string; awayPen: string }>>({});
   const [msg, setMsg] = useState("");
   const [filter, setFilter] = useState<"pending" | "finished">("pending");
   const [phaseFilter, setPhaseFilter] = useState<string>("all");
@@ -125,11 +125,29 @@ export default function Admin() {
       return;
     }
 
+    const match = matches.find((m) => m.id === matchId);
+    const isKnockout = match && match.phase !== "group";
+    const isDraw = parseInt(s.home) === parseInt(s.away);
+
+    const payload: any = {
+      home_score: parseInt(s.home),
+      away_score: parseInt(s.away),
+    };
+
+    if (isKnockout && isDraw) {
+      if (!s.homePen || !s.awayPen) {
+        setMsg("Partido eliminatorio empatado: ingresa el resultado de penales");
+        return;
+      }
+      payload.home_penalties = parseInt(s.homePen);
+      payload.away_penalties = parseInt(s.awayPen);
+    } else if (isKnockout && s.homePen && s.awayPen) {
+      payload.home_penalties = parseInt(s.homePen);
+      payload.away_penalties = parseInt(s.awayPen);
+    }
+
     try {
-      const res = await updateMatchResult(matchId, {
-        home_score: parseInt(s.home),
-        away_score: parseInt(s.away),
-      });
+      const res = await updateMatchResult(matchId, payload);
       const autoGen = res.data?.auto_generated;
       if (autoGen) {
         setMsg(`Resultado guardado. ${autoGen.message}`);
@@ -465,12 +483,22 @@ export default function Admin() {
             const s = scores[match.id] || {
               home: match.home_score?.toString() || "",
               away: match.away_score?.toString() || "",
+              homePen: match.home_penalties?.toString() || "",
+              awayPen: match.away_penalties?.toString() || "",
             };
+            const isKnockout = match.phase !== "group";
+            const isDraw = s.home !== "" && s.away !== "" && parseInt(s.home) === parseInt(s.away);
+            const hasPenalties = match.home_penalties != null;
 
             return (
               <div key={match.id} className="match-card admin-card">
                 <div className="match-date" style={{ fontSize: "0.75rem", color: "#6b7280" }}>
                   #{match.match_number} | {match.phase !== "group" ? match.phase.replace(/_/g, " ") : `Grupo ${match.group_name}`}
+                  {hasPenalties && (
+                    <span style={{ marginLeft: "0.5rem", color: "#7c3aed" }}>
+                      (Pen: {match.home_penalties}-{match.away_penalties})
+                    </span>
+                  )}
                 </div>
                 <div className="match-teams">
                   <div className="team home">
@@ -517,6 +545,49 @@ export default function Admin() {
                     <span className="flag">{match.away_team?.flag_emoji}</span>
                   </div>
                 </div>
+                {isKnockout && isDraw && (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    marginTop: "0.5rem",
+                    padding: "0.5rem",
+                    background: "#fef3c7",
+                    borderRadius: "6px",
+                    fontSize: "0.85rem",
+                  }}>
+                    <span style={{ color: "#92400e" }}>Penales:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      style={{ width: "50px" }}
+                      value={s.homePen}
+                      placeholder="L"
+                      onChange={(e) =>
+                        setScores({
+                          ...scores,
+                          [match.id]: { ...s, homePen: e.target.value },
+                        })
+                      }
+                    />
+                    <span>-</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      style={{ width: "50px" }}
+                      value={s.awayPen}
+                      placeholder="V"
+                      onChange={(e) =>
+                        setScores({
+                          ...scores,
+                          [match.id]: { ...s, awayPen: e.target.value },
+                        })
+                      }
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
