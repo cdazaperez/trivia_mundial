@@ -16,7 +16,13 @@ from app.services.standings import (
 from app.services.knockout import (
     get_knockout_status,
     PHASE_GENERATORS,
+    generate_round_of_32,
+    generate_round_of_16,
+    generate_quarter_finals,
+    generate_semi_finals,
+    generate_finals,
 )
+from app.services.standings import are_all_group_matches_finished
 
 router = APIRouter(prefix="/api/matches", tags=["matches"])
 
@@ -105,6 +111,34 @@ def generate_knockout_round(
     }
 
 
+@router.post("/auto-generate-next")
+def auto_generate_next_phase(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Auto-generate the next knockout phase if previous phase is complete. Admin only."""
+    phase_chain = [
+        (Phase.GROUP, "round_of_32", generate_round_of_32),
+        (Phase.ROUND_OF_32, "round_of_16", generate_round_of_16),
+        (Phase.ROUND_OF_16, "quarter_final", generate_quarter_finals),
+        (Phase.QUARTER_FINAL, "semi_final", generate_semi_finals),
+        (Phase.SEMI_FINAL, "finals", generate_finals),
+    ]
+
+    for prev_phase, next_name, generator_fn in phase_chain:
+        try:
+            matches = generator_fn(db)
+            return {
+                "phase": next_name,
+                "matches_created": len(matches),
+                "message": f"Se generaron {len(matches)} partidos para {next_name}",
+            }
+        except (ValueError, Exception):
+            continue
+
+    return {"message": "No hay fases pendientes por generar"}
+
+
 @router.post("/update-teams")
 def update_teams_endpoint(
     db: Session = Depends(get_db),
@@ -176,7 +210,7 @@ def get_match(match_id: int, db: Session = Depends(get_db), _current_user: User 
     return match
 
 
-@router.put("/{match_id}/result", response_model=MatchResponse)
+@router.put("/{match_id}/result")
 def update_match_result(
     match_id: int,
     result: MatchResultUpdate,
@@ -194,15 +228,45 @@ def update_match_result(
     match.is_finished = True
     db.commit()
 
-    # Calculate points for all predictions on this match
     calculate_points_for_match(db, match)
 
-    # If this is a group match, recalculate group prediction points
     if match.phase == Phase.GROUP and match.group_name:
         calculate_group_prediction_points(db, match.group_name)
 
     db.refresh(match)
-    return match
+
+    auto_generated = _try_auto_generate_next_phase(db, match.phase)
+
+    match_data = MatchResponse.model_validate(match).model_dump()
+    match_data["auto_generated"] = auto_generated
+    return match_data
+
+
+def _try_auto_generate_next_phase(db: Session, current_phase: str) -> dict | None:
+    """Try to auto-generate the next knockout phase if all matches in current phase are done."""
+    NEXT_PHASE = {
+        Phase.GROUP: ("round_of_32", generate_round_of_32),
+        Phase.ROUND_OF_32: ("round_of_16", generate_round_of_16),
+        Phase.ROUND_OF_16: ("quarter_final", generate_quarter_finals),
+        Phase.QUARTER_FINAL: ("semi_final", generate_semi_finals),
+        Phase.SEMI_FINAL: ("finals", generate_finals),
+    }
+
+    generator_info = NEXT_PHASE.get(current_phase)
+    if not generator_info:
+        return None
+
+    phase_name, generator_fn = generator_info
+
+    try:
+        matches = generator_fn(db)
+        return {
+            "phase": phase_name,
+            "matches_created": len(matches),
+            "message": f"Se generaron automáticamente {len(matches)} partidos para la siguiente fase",
+        }
+    except (ValueError, Exception):
+        return None
 
 
 @router.post("/bonus-result")

@@ -117,6 +117,7 @@ export const setBonusResult = (data: {
 export const getKnockoutStatus = () => api.get("/matches/knockout-status");
 export const generateKnockoutRound = (phase: string) =>
   api.post(`/matches/generate-knockout/${phase}`);
+export const autoGenerateNext = () => api.post("/matches/auto-generate-next");
 export const getGroupStandings = () => api.get("/matches/standings/");
 
 export default api;

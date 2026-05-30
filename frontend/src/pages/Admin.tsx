@@ -9,6 +9,7 @@ import {
   updateTeams,
   getKnockoutStatus,
   generateKnockoutRound,
+  autoGenerateNext,
 } from "../services/api";
 import { Match, User } from "../types";
 import { useAuth } from "../contexts/AuthContext";
@@ -125,11 +126,17 @@ export default function Admin() {
     }
 
     try {
-      await updateMatchResult(matchId, {
+      const res = await updateMatchResult(matchId, {
         home_score: parseInt(s.home),
         away_score: parseInt(s.away),
       });
-      setMsg("Resultado guardado y puntos calculados");
+      const autoGen = res.data?.auto_generated;
+      if (autoGen) {
+        setMsg(`Resultado guardado. ${autoGen.message}`);
+        setKnockoutMsg(autoGen.message);
+      } else {
+        setMsg("Resultado guardado y puntos calculados");
+      }
       loadMatches();
       loadKnockoutStatus();
     } catch (err: any) {
@@ -178,6 +185,20 @@ export default function Admin() {
     setKnockoutMsg("");
     try {
       const res = await generateKnockoutRound(phase);
+      setKnockoutMsg(res.data.message);
+      loadMatches();
+      loadKnockoutStatus();
+    } catch (err: any) {
+      setKnockoutMsg(err.response?.data?.detail || "Error al generar fase");
+    }
+    setGenerating(false);
+  };
+
+  const handleAutoGenerate = async () => {
+    setGenerating(true);
+    setKnockoutMsg("");
+    try {
+      const res = await autoGenerateNext();
       setKnockoutMsg(res.data.message);
       loadMatches();
       loadKnockoutStatus();
@@ -272,7 +293,17 @@ export default function Admin() {
             fontSize: "0.9rem",
             color: "#166534",
           }}>
-            <strong>Fase de grupos completa.</strong> Ya puedes generar los 32avos de final.
+            <strong>Fase de grupos completa.</strong> Presiona el botón para generar la siguiente fase automáticamente.
+            <div style={{ marginTop: "0.75rem" }}>
+              <button
+                className="btn btn-primary"
+                onClick={handleAutoGenerate}
+                disabled={generating}
+                style={{ fontSize: "1rem", padding: "0.5rem 1.5rem" }}
+              >
+                {generating ? "Generando..." : "Generar Siguiente Fase Automáticamente"}
+              </button>
+            </div>
           </div>
         )}
 
