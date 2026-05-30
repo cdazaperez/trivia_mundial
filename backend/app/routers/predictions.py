@@ -7,7 +7,7 @@ from app.core.config import WORLD_CUP_START_DATE, PREDICTION_LOCK_HOURS_BEFORE
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.models.tournament import Match, MatchPrediction, GroupPrediction, BonusPrediction, Team
+from app.models.tournament import Match, MatchPrediction, GroupPrediction, BonusPrediction, Team, Phase
 from app.schemas.tournament import (
     PredictionCreate, PredictionResponse,
     GroupPredictionCreate, GroupPredictionResponse,
@@ -26,15 +26,35 @@ def check_admin_cannot_predict(user: User):
         )
 
 
-def check_predictions_locked():
-    """Check if predictions are locked (24h before World Cup starts)."""
+def check_group_predictions_locked():
+    """Check if group predictions are locked (24h before World Cup starts)."""
     lock_date = datetime.strptime(WORLD_CUP_START_DATE, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     lock_deadline = lock_date - timedelta(hours=PREDICTION_LOCK_HOURS_BEFORE)
     if datetime.now(timezone.utc) >= lock_deadline:
         raise HTTPException(
             status_code=403,
-            detail="Los pronósticos están bloqueados. No se pueden modificar 24 horas antes del inicio del mundial.",
+            detail="Los pronósticos de grupos están bloqueados. No se pueden modificar 24 horas antes del inicio del mundial.",
         )
+
+
+def check_bonus_predictions_locked(db: Session):
+    """Check if bonus predictions are locked (when the group phase ends / knockout starts)."""
+    first_knockout = (
+        db.query(Match)
+        .filter(Match.phase != Phase.GROUP)
+        .order_by(Match.match_date)
+        .first()
+    )
+    if first_knockout:
+        match_date = first_knockout.match_date
+        if match_date.tzinfo is None:
+            match_date = match_date.replace(tzinfo=timezone.utc)
+        lock_time = match_date - timedelta(hours=1)
+        if datetime.now(timezone.utc) >= lock_time:
+            raise HTTPException(
+                status_code=403,
+                detail="Las apuestas bonus están bloqueadas. No se pueden modificar una vez iniciada la fase eliminatoria.",
+            )
 
 
 def check_match_prediction_locked(match: Match):
@@ -153,7 +173,7 @@ def create_group_prediction(
     current_user: User = Depends(get_current_user),
 ):
     check_admin_cannot_predict(current_user)
-    check_predictions_locked()
+    check_group_predictions_locked()
 
     # Validate teams belong to the group
     first_team = db.query(Team).filter(Team.id == prediction.first_place_team_id).first()
@@ -212,7 +232,7 @@ def create_bonus_prediction(
     current_user: User = Depends(get_current_user),
 ):
     check_admin_cannot_predict(current_user)
-    check_predictions_locked()
+    check_bonus_predictions_locked(db)
 
     valid_types = ["champion", "runner_up", "top_scorer", "mvp"]
     if prediction.prediction_type not in valid_types:

@@ -12,12 +12,12 @@ TEAMS_DATA = [
     {"name": "México", "code": "MEX", "group": "A", "flag": "🇲🇽"},
     {"name": "Corea del Sur", "code": "KOR", "group": "A", "flag": "🇰🇷"},
     {"name": "Sudáfrica", "code": "RSA", "group": "A", "flag": "🇿🇦"},
-    {"name": "Repechaje UEFA D", "code": "UD4", "group": "A", "flag": "🏳️"},
+    {"name": "Chequia", "code": "CZE", "group": "A", "flag": "🇨🇿"},
     # Group B
     {"name": "Canadá", "code": "CAN", "group": "B", "flag": "🇨🇦"},
     {"name": "Suiza", "code": "SUI", "group": "B", "flag": "🇨🇭"},
     {"name": "Qatar", "code": "QAT", "group": "B", "flag": "🇶🇦"},
-    {"name": "Repechaje UEFA A", "code": "UA4", "group": "B", "flag": "🏳️"},
+    {"name": "Bosnia y Herzegovina", "code": "BIH", "group": "B", "flag": "🇧🇦"},
     # Group C
     {"name": "Brasil", "code": "BRA", "group": "C", "flag": "🇧🇷"},
     {"name": "Marruecos", "code": "MAR", "group": "C", "flag": "🇲🇦"},
@@ -27,7 +27,7 @@ TEAMS_DATA = [
     {"name": "Estados Unidos", "code": "USA", "group": "D", "flag": "🇺🇸"},
     {"name": "Paraguay", "code": "PAR", "group": "D", "flag": "🇵🇾"},
     {"name": "Australia", "code": "AUS", "group": "D", "flag": "🇦🇺"},
-    {"name": "Repechaje UEFA C", "code": "UC4", "group": "D", "flag": "🏳️"},
+    {"name": "Turquía", "code": "TUR", "group": "D", "flag": "🇹🇷"},
     # Group E
     {"name": "Alemania", "code": "GER", "group": "E", "flag": "🇩🇪"},
     {"name": "Costa de Marfil", "code": "CIV", "group": "E", "flag": "🇨🇮"},
@@ -37,7 +37,7 @@ TEAMS_DATA = [
     {"name": "Países Bajos", "code": "NED", "group": "F", "flag": "🇳🇱"},
     {"name": "Japón", "code": "JPN", "group": "F", "flag": "🇯🇵"},
     {"name": "Túnez", "code": "TUN", "group": "F", "flag": "🇹🇳"},
-    {"name": "Repechaje UEFA B", "code": "UB4", "group": "F", "flag": "🏳️"},
+    {"name": "Suecia", "code": "SWE", "group": "F", "flag": "🇸🇪"},
     # Group G
     {"name": "Bélgica", "code": "BEL", "group": "G", "flag": "🇧🇪"},
     {"name": "Egipto", "code": "EGY", "group": "G", "flag": "🇪🇬"},
@@ -52,7 +52,7 @@ TEAMS_DATA = [
     {"name": "Francia", "code": "FRA", "group": "I", "flag": "🇫🇷"},
     {"name": "Senegal", "code": "SEN", "group": "I", "flag": "🇸🇳"},
     {"name": "Noruega", "code": "NOR", "group": "I", "flag": "🇳🇴"},
-    {"name": "Repechaje Intercon. 2", "code": "IC2", "group": "I", "flag": "🏳️"},
+    {"name": "Irak", "code": "IRQ", "group": "I", "flag": "🇮🇶"},
     # Group J
     {"name": "Argentina", "code": "ARG", "group": "J", "flag": "🇦🇷"},
     {"name": "Argelia", "code": "ALG", "group": "J", "flag": "🇩🇿"},
@@ -62,7 +62,7 @@ TEAMS_DATA = [
     {"name": "Portugal", "code": "POR", "group": "K", "flag": "🇵🇹"},
     {"name": "Colombia", "code": "COL", "group": "K", "flag": "🇨🇴"},
     {"name": "Uzbekistán", "code": "UZB", "group": "K", "flag": "🇺🇿"},
-    {"name": "Repechaje Intercon. 1", "code": "IC1", "group": "K", "flag": "🏳️"},
+    {"name": "R.D. del Congo", "code": "COD", "group": "K", "flag": "🇨🇩"},
     # Group L
     {"name": "Inglaterra", "code": "ENG", "group": "L", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
     {"name": "Croacia", "code": "CRO", "group": "L", "flag": "🇭🇷"},

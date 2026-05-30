@@ -71,7 +71,7 @@ export default function Leaderboard() {
         </thead>
         <tbody>
           {entries.map((entry, i) => (
-            <tr key={entry.user_id} className={i < 2 ? "top-player" : ""}>
+            <tr key={entry.user_id} className={i < 3 ? "top-player" : ""}>
               <td className="rank">{getMedal(i)}</td>
               <td>
                 <strong>{entry.full_name}</strong>
@@ -88,25 +88,23 @@ export default function Leaderboard() {
         </tbody>
       </table>
 
-      {phaseWinners && Object.keys(phaseWinners).length > 0 && (
+      {phaseWinners && (
         <div className="phase-winners-section">
-          <h3>Ganadores por Fase</h3>
-          {Object.entries(phaseWinners).map(([phase, data]: [string, any]) => (
-            <div key={phase} className="phase-winner-card">
-              <h4>
-                {PHASES.find((p) => p.key === phase)?.label || phase}
-                {data.all_completed && " ✓"}
-              </h4>
-              <p>
-                Partidos: {data.completed_matches}/{data.total_matches}
-              </p>
-              {data.top_2?.map((w: any, i: number) => (
+          <h3>Premios al Final del Mundial</h3>
+          <div className="phase-winner-card">
+            <p>Partidos finalizados: {phaseWinners.finished_matches || 0}/{phaseWinners.total_matches || 0}</p>
+            {phaseWinners.tournament_finished && <p><strong>Torneo finalizado</strong></p>}
+            <div style={{ marginTop: "0.5rem" }}>
+              {phaseWinners.top_3?.map((w: any, i: number) => (
                 <div key={i} className="winner-entry">
                   {getMedal(i)} {w.full_name} - {w.points} pts
+                  <span style={{ marginLeft: "0.5rem", color: "#6b7280", fontSize: "0.85rem" }}>
+                    ({["60%", "30%", "10%"][i]} del pozo)
+                  </span>
                 </div>
               ))}
             </div>
-          ))}
+          </div>
         </div>
       )}
     </div>

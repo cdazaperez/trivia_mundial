@@ -107,6 +107,11 @@ export const getPhaseWinners = () => api.get("/leaderboard/phase-winners");
 export const resetAllResults = () => api.post("/matches/reset-all");
 export const reseedData = () => api.post("/matches/reseed");
 export const updateTeams = () => api.post("/matches/update-teams");
+export const setBonusResult = (data: {
+  prediction_type: string;
+  team_id?: number;
+  player_name?: string;
+}) => api.post("/matches/bonus-result", data);
 
 // Standings & Knockout
 export const getKnockoutStatus = () => api.get("/matches/knockout-status");

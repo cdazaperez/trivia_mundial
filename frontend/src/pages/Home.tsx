@@ -64,11 +64,22 @@ export default function Home() {
       <div className="rules-info">
         <h3>Reglas</h3>
         <ul>
-          <li>Los pronósticos de marcadores se bloquean 1 hora antes de cada partido</li>
-          <li>Las apuestas bonus se bloquean 24 horas antes del inicio del mundial</li>
-          <li>Ganan los <strong>2 primeros</strong> en puntos al terminar la fase de grupos</li>
-          <li>En eliminatorias se puede volver a apostar, gana el que más puntos sume</li>
+          <li>Los pronósticos de marcadores se bloquean <strong>1 hora antes</strong> de cada partido</li>
+          <li>Los pronósticos de grupos se bloquean <strong>24 horas antes</strong> del inicio del mundial</li>
+          <li>Las apuestas bonus se pueden modificar hasta antes de la fase eliminatoria</li>
+          <li>En eliminatorias se puede apostar en los nuevos partidos generados</li>
+          <li>Los puntos se <strong>acumulan</strong> durante todo el mundial</li>
           <li>Los pronósticos de otros jugadores se ven después de que termine el partido</li>
+        </ul>
+      </div>
+
+      <div className="rules-info">
+        <h3>Premios</h3>
+        <ul>
+          <li>Los ganadores se definen al <strong>terminar el mundial</strong> (no por fase)</li>
+          <li>1er lugar: <strong>60%</strong> del pozo recaudado</li>
+          <li>2do lugar: <strong>30%</strong> del pozo recaudado</li>
+          <li>3er lugar: <strong>10%</strong> del pozo recaudado</li>
         </ul>
       </div>
     </div>

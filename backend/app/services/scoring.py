@@ -1,7 +1,16 @@
 from sqlalchemy.orm import Session
 
-from app.core.config import POINTS_EXACT_SCORE, POINTS_CORRECT_RESULT
-from app.models.tournament import Match, MatchPrediction
+from app.core.config import (
+    POINTS_EXACT_SCORE,
+    POINTS_CORRECT_RESULT,
+    POINTS_GROUP_QUALIFIER,
+    POINTS_GROUP_FIRST,
+    POINTS_CHAMPION,
+    POINTS_RUNNER_UP,
+    POINTS_TOP_SCORER,
+    POINTS_MVP,
+)
+from app.models.tournament import Match, MatchPrediction, GroupPrediction, BonusPrediction, Phase, Team
 
 
 def calculate_points_for_match(db: Session, match: Match):
@@ -44,3 +53,82 @@ def _get_result(home: int, away: int) -> str:
     elif home < away:
         return "away"
     return "draw"
+
+
+def calculate_group_prediction_points(db: Session, group_name: str):
+    """Calculate points for group predictions once all group matches are finished."""
+    from app.services.standings import calculate_group_standings
+
+    group_matches = db.query(Match).filter(
+        Match.phase == Phase.GROUP,
+        Match.group_name == group_name,
+    ).all()
+
+    if not group_matches or not all(m.is_finished for m in group_matches):
+        return 0
+
+    standings = calculate_group_standings(db, group_name)
+    if len(standings) < 2:
+        return 0
+
+    actual_first_id = standings[0]["team_id"]
+    actual_second_id = standings[1]["team_id"]
+    qualifiers = {actual_first_id, actual_second_id}
+
+    predictions = db.query(GroupPrediction).filter(
+        GroupPrediction.group_name == group_name
+    ).all()
+
+    updated = 0
+    for pred in predictions:
+        points = 0
+        if pred.first_place_team_id == actual_first_id:
+            points += POINTS_GROUP_FIRST
+        elif pred.first_place_team_id in qualifiers:
+            points += POINTS_GROUP_QUALIFIER
+
+        if pred.second_place_team_id == actual_second_id:
+            points += POINTS_GROUP_FIRST
+        elif pred.second_place_team_id in qualifiers:
+            points += POINTS_GROUP_QUALIFIER
+
+        pred.points_earned = points
+        if points > 0:
+            updated += 1
+
+    db.commit()
+    return updated
+
+
+def calculate_bonus_prediction_points(db: Session, prediction_type: str, team_id: int | None = None, player_name: str | None = None):
+    """Calculate points for a specific bonus prediction type. Admin sets the actual result."""
+    points_map = {
+        "champion": POINTS_CHAMPION,
+        "runner_up": POINTS_RUNNER_UP,
+        "top_scorer": POINTS_TOP_SCORER,
+        "mvp": POINTS_MVP,
+    }
+
+    max_points = points_map.get(prediction_type, 0)
+    if max_points == 0:
+        return 0
+
+    predictions = db.query(BonusPrediction).filter(
+        BonusPrediction.prediction_type == prediction_type
+    ).all()
+
+    updated = 0
+    for pred in predictions:
+        points = 0
+        if prediction_type in ("champion", "runner_up"):
+            if team_id and pred.team_id == team_id:
+                points = max_points
+        else:
+            if player_name and pred.player_name and pred.player_name.strip().lower() == player_name.strip().lower():
+                points = max_points
+        pred.points_earned = points
+        if points > 0:
+            updated += 1
+
+    db.commit()
+    return updated

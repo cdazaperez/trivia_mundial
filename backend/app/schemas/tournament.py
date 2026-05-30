@@ -83,6 +83,12 @@ class BonusPredictionResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class BonusResultUpdate(BaseModel):
+    prediction_type: str  # champion, runner_up, top_scorer, mvp
+    team_id: int | None = None
+    player_name: str | None = None
+
+
 class LeaderboardEntry(BaseModel):
     user_id: int
     username: str

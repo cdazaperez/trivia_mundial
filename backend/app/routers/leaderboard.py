@@ -74,43 +74,43 @@ def get_phase_winners(
     db: Session = Depends(get_db),
     _current_user: User = Depends(get_current_user),
 ):
-    """Get top 2 winners for each completed phase."""
-    results = {}
-    for phase in Phase:
-        phase_matches = db.query(Match).filter(
-            Match.phase == phase.value,
+    """Get top 3 overall winners with prize distribution (60/30/10)."""
+    total_matches = db.query(Match).count()
+    finished_matches = db.query(Match).filter(Match.is_finished == True).count()
+    tournament_finished = total_matches > 0 and total_matches == finished_matches
+
+    users = db.query(User).filter(User.is_active == True, User.is_admin == False).all()
+    entries = []
+
+    for user in users:
+        match_preds = db.query(MatchPrediction).join(Match).filter(
+            MatchPrediction.user_id == user.id,
             Match.is_finished == True,
-        ).count()
+        ).all()
+        match_points = sum(p.points_earned for p in match_preds)
 
-        total_matches = db.query(Match).filter(Match.phase == phase.value).count()
+        group_preds = db.query(GroupPrediction).filter(
+            GroupPrediction.user_id == user.id
+        ).all()
+        group_points = sum(p.points_earned for p in group_preds)
 
-        if total_matches == 0:
-            continue
+        bonus_preds = db.query(BonusPrediction).filter(
+            BonusPrediction.user_id == user.id
+        ).all()
+        bonus_points = sum(p.points_earned for p in bonus_preds)
 
-        # Get leaderboard for this phase
-        users = db.query(User).filter(User.is_active == True, User.is_admin == False).all()
-        phase_entries = []
+        entries.append({
+            "username": user.username,
+            "full_name": user.full_name,
+            "points": match_points + group_points + bonus_points,
+        })
 
-        for user in users:
-            preds = db.query(MatchPrediction).join(Match).filter(
-                MatchPrediction.user_id == user.id,
-                Match.phase == phase.value,
-                Match.is_finished == True,
-            ).all()
-            points = sum(p.points_earned for p in preds)
-            phase_entries.append({
-                "username": user.username,
-                "full_name": user.full_name,
-                "points": points,
-            })
+    entries.sort(key=lambda e: e["points"], reverse=True)
 
-        phase_entries.sort(key=lambda e: e["points"], reverse=True)
-
-        results[phase.value] = {
-            "completed_matches": phase_matches,
-            "total_matches": total_matches,
-            "all_completed": phase_matches == total_matches,
-            "top_2": phase_entries[:2] if phase_entries else [],
-        }
-
-    return results
+    return {
+        "tournament_finished": tournament_finished,
+        "total_matches": total_matches,
+        "finished_matches": finished_matches,
+        "prize_distribution": {"1st": "60%", "2nd": "30%", "3rd": "10%"},
+        "top_3": entries[:3] if entries else [],
+    }

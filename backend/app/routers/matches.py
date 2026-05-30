@@ -5,8 +5,8 @@ from app.core.database import get_db
 from app.core.security import get_current_user, get_admin_user
 from app.models.user import User
 from app.models.tournament import Match, MatchPrediction, GroupPrediction, BonusPrediction, Phase, Team
-from app.schemas.tournament import MatchResponse, MatchResultUpdate
-from app.services.scoring import calculate_points_for_match
+from app.schemas.tournament import MatchResponse, MatchResultUpdate, BonusResultUpdate
+from app.services.scoring import calculate_points_for_match, calculate_group_prediction_points, calculate_bonus_prediction_points
 from app.services.standings import (
     calculate_group_standings,
     get_all_group_standings,
@@ -196,8 +196,32 @@ def update_match_result(
     # Calculate points for all predictions on this match
     calculate_points_for_match(db, match)
 
+    # If this is a group match, recalculate group prediction points
+    if match.phase == Phase.GROUP and match.group_name:
+        calculate_group_prediction_points(db, match.group_name)
+
     db.refresh(match)
     return match
+
+
+@router.post("/bonus-result")
+def set_bonus_result(
+    data: BonusResultUpdate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Set the actual bonus result and calculate points. Admin only."""
+    valid_types = ["champion", "runner_up", "top_scorer", "mvp"]
+    if data.prediction_type not in valid_types:
+        raise HTTPException(status_code=400, detail=f"Tipo inválido. Opciones: {', '.join(valid_types)}")
+
+    updated = calculate_bonus_prediction_points(
+        db,
+        data.prediction_type,
+        team_id=data.team_id,
+        player_name=data.player_name,
+    )
+    return {"detail": f"Bonus '{data.prediction_type}' calculado. {updated} acertaron."}
 
 
 @router.post("/reset-all")

@@ -83,7 +83,7 @@ export default function Bonus() {
     <div className="page">
       <h2>Apuestas Bonus</h2>
       <p className="hint">
-        Apuestas adicionales con puntos extra. Se bloquean 24 horas antes del mundial.
+        Apuestas adicionales con puntos extra. Se bloquean al iniciar la fase eliminatoria.
       </p>
 
       {msg && <div className="success-msg">{msg}</div>}
