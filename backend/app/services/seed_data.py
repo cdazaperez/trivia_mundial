@@ -82,52 +82,149 @@ def seed_teams(db: Session):
     db.commit()
 
 
+GROUP_MATCHES_DATA = [
+    # Group A: MEX, KOR, RSA, CZE
+    {"n": 1, "g": "A", "md": 1, "h": "MEX", "a": "RSA", "dt": "2026-06-11T19:00", "v": "Estadio Azteca, Ciudad de México"},
+    {"n": 2, "g": "A", "md": 1, "h": "KOR", "a": "CZE", "dt": "2026-06-12T02:00", "v": "Estadio Akron, Guadalajara"},
+    {"n": 3, "g": "A", "md": 2, "h": "CZE", "a": "RSA", "dt": "2026-06-18T16:00", "v": "Mercedes-Benz Stadium, Atlanta"},
+    {"n": 4, "g": "A", "md": 2, "h": "MEX", "a": "KOR", "dt": "2026-06-19T01:00", "v": "Estadio Akron, Guadalajara"},
+    {"n": 5, "g": "A", "md": 3, "h": "RSA", "a": "KOR", "dt": "2026-06-25T01:00", "v": "Estadio BBVA, Monterrey"},
+    {"n": 6, "g": "A", "md": 3, "h": "CZE", "a": "MEX", "dt": "2026-06-25T01:00", "v": "Estadio Azteca, Ciudad de México"},
+    # Group B: CAN, SUI, QAT, BIH
+    {"n": 7, "g": "B", "md": 1, "h": "CAN", "a": "BIH", "dt": "2026-06-12T19:00", "v": "BMO Field, Toronto"},
+    {"n": 8, "g": "B", "md": 1, "h": "QAT", "a": "SUI", "dt": "2026-06-13T19:00", "v": "Levi's Stadium, Santa Clara"},
+    {"n": 9, "g": "B", "md": 2, "h": "SUI", "a": "BIH", "dt": "2026-06-18T19:00", "v": "SoFi Stadium, Los Ángeles"},
+    {"n": 10, "g": "B", "md": 2, "h": "CAN", "a": "QAT", "dt": "2026-06-18T22:00", "v": "BC Place, Vancouver"},
+    {"n": 11, "g": "B", "md": 3, "h": "SUI", "a": "CAN", "dt": "2026-06-24T19:00", "v": "BC Place, Vancouver"},
+    {"n": 12, "g": "B", "md": 3, "h": "BIH", "a": "QAT", "dt": "2026-06-24T19:00", "v": "Lumen Field, Seattle"},
+    # Group C: BRA, MAR, HAI, SCO
+    {"n": 13, "g": "C", "md": 1, "h": "BRA", "a": "MAR", "dt": "2026-06-13T22:00", "v": "MetLife Stadium, Nueva Jersey"},
+    {"n": 14, "g": "C", "md": 1, "h": "HAI", "a": "SCO", "dt": "2026-06-14T01:00", "v": "Gillette Stadium, Foxborough"},
+    {"n": 15, "g": "C", "md": 2, "h": "SCO", "a": "MAR", "dt": "2026-06-19T22:00", "v": "MetLife Stadium, Nueva Jersey"},
+    {"n": 16, "g": "C", "md": 2, "h": "BRA", "a": "HAI", "dt": "2026-06-20T01:00", "v": "Gillette Stadium, Foxborough"},
+    {"n": 17, "g": "C", "md": 3, "h": "MAR", "a": "HAI", "dt": "2026-06-25T22:00", "v": "MetLife Stadium, Nueva Jersey"},
+    {"n": 18, "g": "C", "md": 3, "h": "SCO", "a": "BRA", "dt": "2026-06-25T22:00", "v": "Gillette Stadium, Foxborough"},
+    # Group D: USA, PAR, AUS, TUR
+    {"n": 19, "g": "D", "md": 1, "h": "USA", "a": "PAR", "dt": "2026-06-13T01:00", "v": "SoFi Stadium, Los Ángeles"},
+    {"n": 20, "g": "D", "md": 1, "h": "AUS", "a": "TUR", "dt": "2026-06-13T04:00", "v": "BC Place, Vancouver"},
+    {"n": 21, "g": "D", "md": 2, "h": "USA", "a": "AUS", "dt": "2026-06-19T19:00", "v": "Lumen Field, Seattle"},
+    {"n": 22, "g": "D", "md": 2, "h": "TUR", "a": "PAR", "dt": "2026-06-20T03:00", "v": "Levi's Stadium, Santa Clara"},
+    {"n": 23, "g": "D", "md": 3, "h": "TUR", "a": "USA", "dt": "2026-06-26T02:00", "v": "SoFi Stadium, Los Ángeles"},
+    {"n": 24, "g": "D", "md": 3, "h": "PAR", "a": "AUS", "dt": "2026-06-26T02:00", "v": "Levi's Stadium, Santa Clara"},
+    # Group E: GER, CIV, ECU, CUW
+    {"n": 25, "g": "E", "md": 1, "h": "GER", "a": "CUW", "dt": "2026-06-14T17:00", "v": "NRG Stadium, Houston"},
+    {"n": 26, "g": "E", "md": 1, "h": "CIV", "a": "ECU", "dt": "2026-06-14T23:00", "v": "Lincoln Financial Field, Filadelfia"},
+    {"n": 27, "g": "E", "md": 2, "h": "ECU", "a": "CUW", "dt": "2026-06-20T17:00", "v": "NRG Stadium, Houston"},
+    {"n": 28, "g": "E", "md": 2, "h": "GER", "a": "CIV", "dt": "2026-06-20T23:00", "v": "Lincoln Financial Field, Filadelfia"},
+    {"n": 29, "g": "E", "md": 3, "h": "ECU", "a": "GER", "dt": "2026-06-26T19:00", "v": "NRG Stadium, Houston"},
+    {"n": 30, "g": "E", "md": 3, "h": "CUW", "a": "CIV", "dt": "2026-06-26T19:00", "v": "Lincoln Financial Field, Filadelfia"},
+    # Group F: NED, JPN, TUN, SWE
+    {"n": 31, "g": "F", "md": 1, "h": "NED", "a": "JPN", "dt": "2026-06-14T20:00", "v": "AT&T Stadium, Arlington"},
+    {"n": 32, "g": "F", "md": 1, "h": "SWE", "a": "TUN", "dt": "2026-06-15T02:00", "v": "Estadio BBVA, Monterrey"},
+    {"n": 33, "g": "F", "md": 2, "h": "NED", "a": "SWE", "dt": "2026-06-20T17:00", "v": "NRG Stadium, Houston"},
+    {"n": 34, "g": "F", "md": 2, "h": "TUN", "a": "JPN", "dt": "2026-06-21T04:00", "v": "Estadio BBVA, Monterrey"},
+    {"n": 35, "g": "F", "md": 3, "h": "JPN", "a": "SWE", "dt": "2026-06-25T23:00", "v": "AT&T Stadium, Arlington"},
+    {"n": 36, "g": "F", "md": 3, "h": "TUN", "a": "NED", "dt": "2026-06-25T23:00", "v": "Arrowhead Stadium, Kansas City"},
+    # Group G: BEL, EGY, IRN, NZL
+    {"n": 37, "g": "G", "md": 1, "h": "BEL", "a": "IRN", "dt": "2026-06-15T19:00", "v": "SoFi Stadium, Los Ángeles"},
+    {"n": 38, "g": "G", "md": 1, "h": "NZL", "a": "EGY", "dt": "2026-06-16T01:00", "v": "BC Place, Vancouver"},
+    {"n": 39, "g": "G", "md": 2, "h": "EGY", "a": "IRN", "dt": "2026-06-22T03:00", "v": "Lumen Field, Seattle"},
+    {"n": 40, "g": "G", "md": 2, "h": "NZL", "a": "BEL", "dt": "2026-06-22T03:00", "v": "BC Place, Vancouver"},
+    {"n": 41, "g": "G", "md": 3, "h": "IRN", "a": "NZL", "dt": "2026-06-26T22:00", "v": "SoFi Stadium, Los Ángeles"},
+    {"n": 42, "g": "G", "md": 3, "h": "EGY", "a": "BEL", "dt": "2026-06-26T22:00", "v": "Lumen Field, Seattle"},
+    # Group H: ESP, URU, KSA, CPV
+    {"n": 43, "g": "H", "md": 1, "h": "ESP", "a": "KSA", "dt": "2026-06-15T16:00", "v": "Mercedes-Benz Stadium, Atlanta"},
+    {"n": 44, "g": "H", "md": 1, "h": "URU", "a": "CPV", "dt": "2026-06-15T22:00", "v": "Hard Rock Stadium, Miami"},
+    {"n": 45, "g": "H", "md": 2, "h": "CPV", "a": "KSA", "dt": "2026-06-21T22:00", "v": "NRG Stadium, Houston"},
+    {"n": 46, "g": "H", "md": 2, "h": "URU", "a": "ESP", "dt": "2026-06-22T00:00", "v": "Estadio Akron, Guadalajara"},
+    {"n": 47, "g": "H", "md": 3, "h": "KSA", "a": "URU", "dt": "2026-06-27T00:00", "v": "Hard Rock Stadium, Miami"},
+    {"n": 48, "g": "H", "md": 3, "h": "CPV", "a": "ESP", "dt": "2026-06-27T00:00", "v": "Mercedes-Benz Stadium, Atlanta"},
+    # Group I: FRA, SEN, NOR, IRQ
+    {"n": 49, "g": "I", "md": 1, "h": "FRA", "a": "IRQ", "dt": "2026-06-16T21:00", "v": "Lincoln Financial Field, Filadelfia"},
+    {"n": 50, "g": "I", "md": 1, "h": "NOR", "a": "SEN", "dt": "2026-06-17T00:00", "v": "MetLife Stadium, Nueva Jersey"},
+    {"n": 51, "g": "I", "md": 2, "h": "NOR", "a": "FRA", "dt": "2026-06-22T19:00", "v": "Gillette Stadium, Foxborough"},
+    {"n": 52, "g": "I", "md": 2, "h": "SEN", "a": "IRQ", "dt": "2026-06-22T19:00", "v": "BMO Field, Toronto"},
+    {"n": 53, "g": "I", "md": 3, "h": "IRQ", "a": "NOR", "dt": "2026-06-27T19:00", "v": "MetLife Stadium, Nueva Jersey"},
+    {"n": 54, "g": "I", "md": 3, "h": "SEN", "a": "FRA", "dt": "2026-06-27T19:00", "v": "Lincoln Financial Field, Filadelfia"},
+    # Group J: ARG, ALG, AUT, JOR
+    {"n": 55, "g": "J", "md": 1, "h": "ARG", "a": "AUT", "dt": "2026-06-16T17:00", "v": "AT&T Stadium, Arlington"},
+    {"n": 56, "g": "J", "md": 1, "h": "ALG", "a": "JOR", "dt": "2026-06-17T04:00", "v": "Levi's Stadium, Santa Clara"},
+    {"n": 57, "g": "J", "md": 2, "h": "ALG", "a": "AUT", "dt": "2026-06-22T22:00", "v": "Arrowhead Stadium, Kansas City"},
+    {"n": 58, "g": "J", "md": 2, "h": "JOR", "a": "ARG", "dt": "2026-06-23T02:00", "v": "AT&T Stadium, Arlington"},
+    {"n": 59, "g": "J", "md": 3, "h": "AUT", "a": "JOR", "dt": "2026-06-27T22:00", "v": "Arrowhead Stadium, Kansas City"},
+    {"n": 60, "g": "J", "md": 3, "h": "ARG", "a": "ALG", "dt": "2026-06-27T22:00", "v": "AT&T Stadium, Arlington"},
+    # Group K: POR, COL, UZB, COD
+    {"n": 61, "g": "K", "md": 1, "h": "POR", "a": "COL", "dt": "2026-06-17T23:30", "v": "Hard Rock Stadium, Miami"},
+    {"n": 62, "g": "K", "md": 1, "h": "COD", "a": "UZB", "dt": "2026-06-18T02:00", "v": "Mercedes-Benz Stadium, Atlanta"},
+    {"n": 63, "g": "K", "md": 2, "h": "UZB", "a": "COL", "dt": "2026-06-23T19:00", "v": "Hard Rock Stadium, Miami"},
+    {"n": 64, "g": "K", "md": 2, "h": "POR", "a": "COD", "dt": "2026-06-23T22:00", "v": "Mercedes-Benz Stadium, Atlanta"},
+    {"n": 65, "g": "K", "md": 3, "h": "COL", "a": "COD", "dt": "2026-06-28T01:00", "v": "Hard Rock Stadium, Miami"},
+    {"n": 66, "g": "K", "md": 3, "h": "UZB", "a": "POR", "dt": "2026-06-28T01:00", "v": "Mercedes-Benz Stadium, Atlanta"},
+    # Group L: ENG, CRO, GHA, PAN
+    {"n": 67, "g": "L", "md": 1, "h": "ENG", "a": "CRO", "dt": "2026-06-17T20:00", "v": "AT&T Stadium, Arlington"},
+    {"n": 68, "g": "L", "md": 1, "h": "GHA", "a": "PAN", "dt": "2026-06-17T23:00", "v": "BMO Field, Toronto"},
+    {"n": 69, "g": "L", "md": 2, "h": "PAN", "a": "ENG", "dt": "2026-06-23T22:00", "v": "AT&T Stadium, Arlington"},
+    {"n": 70, "g": "L", "md": 2, "h": "CRO", "a": "GHA", "dt": "2026-06-24T01:00", "v": "BMO Field, Toronto"},
+    {"n": 71, "g": "L", "md": 3, "h": "CRO", "a": "PAN", "dt": "2026-06-28T01:00", "v": "AT&T Stadium, Arlington"},
+    {"n": 72, "g": "L", "md": 3, "h": "GHA", "a": "ENG", "dt": "2026-06-28T01:00", "v": "BMO Field, Toronto"},
+]
+
+
 def seed_group_matches(db: Session):
     """Create group stage matches - 6 matches per group (round robin), 72 total."""
     if db.query(Match).count() > 0:
         return  # Already seeded
 
-    match_number = 1
-    base_date = datetime(2026, 6, 11, 18, 0, 0, tzinfo=timezone.utc)
+    team_by_code = {t.code: t for t in db.query(Team).all()}
 
-    groups = sorted(set(t["group"] for t in TEAMS_DATA))
-
-    for group in groups:
-        group_teams = db.query(Team).filter(Team.group_name == group).all()
-        if len(group_teams) != 4:
+    for m in GROUP_MATCHES_DATA:
+        home = team_by_code.get(m["h"])
+        away = team_by_code.get(m["a"])
+        if not home or not away:
             continue
 
-        # Round robin: 6 matches per group
-        matchups = [
-            (0, 1), (2, 3),  # Matchday 1
-            (0, 2), (1, 3),  # Matchday 2
-            (0, 3), (1, 2),  # Matchday 3
-        ]
+        match_date = datetime.fromisoformat(m["dt"]).replace(tzinfo=timezone.utc)
 
-        for i, (h, a) in enumerate(matchups):
-            matchday = (i // 2) + 1
-            hour_offset = (i % 2) * 3  # 3 hours apart
-
-            from datetime import timedelta
-            match_date = base_date + timedelta(
-                days=(ord(group) - ord('A')) + (matchday - 1) * 12,
-                hours=hour_offset,
-            )
-
-            match = Match(
-                match_number=match_number,
-                phase=Phase.GROUP,
-                group_name=group,
-                home_team_id=group_teams[h].id,
-                away_team_id=group_teams[a].id,
-                match_date=match_date,
-                venue=f"Estadio {group}{matchday}",
-                matchday=matchday,
-            )
-            db.add(match)
-            match_number += 1
+        match = Match(
+            match_number=m["n"],
+            phase=Phase.GROUP,
+            group_name=m["g"],
+            home_team_id=home.id,
+            away_team_id=away.id,
+            match_date=match_date,
+            venue=m["v"],
+            matchday=m["md"],
+        )
+        db.add(match)
 
     db.commit()
+
+
+def force_update_matches(db: Session):
+    """Update match dates, venues, and matchups in-place without deleting predictions."""
+    team_by_code = {t.code: t for t in db.query(Team).all()}
+    updated = 0
+
+    for m in GROUP_MATCHES_DATA:
+        home = team_by_code.get(m["h"])
+        away = team_by_code.get(m["a"])
+        if not home or not away:
+            continue
+
+        match_date = datetime.fromisoformat(m["dt"]).replace(tzinfo=timezone.utc)
+
+        db_match = db.query(Match).filter(Match.match_number == m["n"]).first()
+        if db_match:
+            db_match.home_team_id = home.id
+            db_match.away_team_id = away.id
+            db_match.match_date = match_date
+            db_match.venue = m["v"]
+            db_match.matchday = m["md"]
+            db_match.group_name = m["g"]
+            updated += 1
+
+    db.commit()
+    return updated
 
 
 def force_update_teams(db: Session):

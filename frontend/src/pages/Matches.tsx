@@ -157,6 +157,36 @@ export default function Matches() {
 
       {msg && <div className="success-msg">{msg}</div>}
 
+      {/* Knockout info banner */}
+      {selectedPhase === "group" && availablePhases.length === 1 && (
+        <div className="info-banner" style={{
+          background: "#eef2ff",
+          border: "1px solid #c7d2fe",
+          borderRadius: "8px",
+          padding: "0.75rem 1rem",
+          marginBottom: "1rem",
+          fontSize: "0.9rem",
+          color: "#4338ca",
+        }}>
+          Las fases eliminatorias (32avos, octavos, etc.) se habilitan una vez que termine la fase de grupos.
+          Cuando se generen, aparecerán nuevas pestañas arriba para pronosticar esos partidos.
+        </div>
+      )}
+
+      {selectedPhase !== "group" && (
+        <div className="info-banner" style={{
+          background: "#f0fdf4",
+          border: "1px solid #bbf7d0",
+          borderRadius: "8px",
+          padding: "0.75rem 1rem",
+          marginBottom: "1rem",
+          fontSize: "0.9rem",
+          color: "#166534",
+        }}>
+          Ingresa tus marcadores para cada partido de {phaseLabel}. Se bloquean 1 hora antes de cada partido.
+        </div>
+      )}
+
       {matches.length === 0 && (
         <p className="hint" style={{ textAlign: "center", marginTop: "2rem" }}>
           No hay partidos disponibles para {phaseLabel}.
@@ -174,8 +204,9 @@ export default function Matches() {
               className={`match-card ${match.is_finished ? "finished" : ""}`}
             >
               <div className="match-date">
-                {selectedPhase !== "group" && (
-                  <span className="match-number">#{match.match_number} </span>
+                <span className="match-number">#{match.match_number} </span>
+                {selectedPhase === "group" && (
+                  <span>Grupo {match.group_name} &middot; </span>
                 )}
                 {formatDate(match.match_date)}
               </div>

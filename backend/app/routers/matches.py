@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.tournament import Match, MatchPrediction, GroupPrediction, BonusPrediction, Phase, Team
 from app.schemas.tournament import MatchResponse, MatchResultUpdate, BonusResultUpdate
 from app.services.scoring import calculate_points_for_match, calculate_group_prediction_points, calculate_bonus_prediction_points
+from app.services.seed_data import force_update_teams, force_update_matches
 from app.services.standings import (
     calculate_group_standings,
     get_all_group_standings,
@@ -109,10 +110,10 @@ def update_teams_endpoint(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
-    """Update team names/codes/flags in-place. Preserves predictions."""
-    from app.services.seed_data import force_update_teams
-    updated = force_update_teams(db)
-    return {"detail": f"Se actualizaron {updated} equipos correctamente"}
+    """Update team names/codes/flags and match dates/venues in-place. Preserves predictions."""
+    teams_updated = force_update_teams(db)
+    matches_updated = force_update_matches(db)
+    return {"detail": f"Se actualizaron {teams_updated} equipos y {matches_updated} partidos correctamente"}
 
 
 @router.post("/reseed")
