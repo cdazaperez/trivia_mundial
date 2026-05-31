@@ -14,6 +14,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     is_admin: bool
+    is_active: bool = True
 
     model_config = {"from_attributes": True}
 

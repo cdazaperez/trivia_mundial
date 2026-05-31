@@ -96,5 +96,24 @@ def list_users(
     db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
-    """List all non-admin users (for admin password reset dropdown)."""
+    """List all non-admin users (for admin management)."""
     return db.query(User).filter(User.is_admin == False).order_by(User.username).all()
+
+
+@router.put("/admin/toggle-user/{user_id}")
+def toggle_user_active(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Block or unblock a user. Admin only."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if user.is_admin:
+        raise HTTPException(status_code=400, detail="No se puede bloquear a un administrador")
+
+    user.is_active = not user.is_active
+    db.commit()
+    action = "activado" if user.is_active else "bloqueado"
+    return {"detail": f"Usuario {user.username} {action}", "is_active": user.is_active}

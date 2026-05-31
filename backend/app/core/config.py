@@ -23,3 +23,7 @@ POINTS_CHAMPION = 10
 POINTS_RUNNER_UP = 5
 POINTS_TOP_SCORER = 5
 POINTS_MVP = 5
+
+# Entry fee and prize distribution
+ENTRY_FEE = 50  # pesos per participant
+PRIZE_DISTRIBUTION = [0.60, 0.30, 0.10]  # 1st, 2nd, 3rd

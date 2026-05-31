@@ -4,6 +4,7 @@ import {
   updateMatchResult,
   adminResetPassword,
   listUsers,
+  toggleUserActive,
   resetAllResults,
   reseedData,
   updateTeams,
@@ -377,6 +378,66 @@ export default function Admin() {
             Resetear
           </button>
         </div>
+      </div>
+
+      {/* === USER MANAGEMENT === */}
+      <div className="admin-section">
+        <h3>Gestión de Participantes</h3>
+        <p className="hint">
+          Bloquea o activa participantes. Valor inscripción: $50 pesos.
+          Participantes activos: {users.filter((u) => u.is_active).length} |
+          Pozo total: ${users.filter((u) => u.is_active).length * 50} pesos
+        </p>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
+          <thead>
+            <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
+              <th style={{ padding: "0.5rem" }}>Usuario</th>
+              <th style={{ padding: "0.5rem" }}>Nombre</th>
+              <th style={{ padding: "0.5rem" }}>Email</th>
+              <th style={{ padding: "0.5rem" }}>Estado</th>
+              <th style={{ padding: "0.5rem" }}>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id} style={{
+                borderBottom: "1px solid #e5e7eb",
+                opacity: u.is_active ? 1 : 0.5,
+              }}>
+                <td style={{ padding: "0.5rem" }}>@{u.username}</td>
+                <td style={{ padding: "0.5rem" }}>{u.full_name}</td>
+                <td style={{ padding: "0.5rem", fontSize: "0.8rem" }}>{u.email}</td>
+                <td style={{ padding: "0.5rem" }}>
+                  <span style={{
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    fontSize: "0.75rem",
+                    background: u.is_active ? "#dcfce7" : "#fee2e2",
+                    color: u.is_active ? "#166534" : "#991b1b",
+                  }}>
+                    {u.is_active ? "Activo" : "Bloqueado"}
+                  </span>
+                </td>
+                <td style={{ padding: "0.5rem" }}>
+                  <button
+                    className={`btn btn-sm ${u.is_active ? "btn-danger" : "btn-primary"}`}
+                    onClick={async () => {
+                      try {
+                        await toggleUserActive(u.id);
+                        loadUsers();
+                      } catch (err: any) {
+                        setMsg(err.response?.data?.detail || "Error");
+                      }
+                    }}
+                    style={{ fontSize: "0.75rem", padding: "2px 10px" }}
+                  >
+                    {u.is_active ? "Bloquear" : "Activar"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* === UPDATE TEAMS === */}

@@ -49,6 +49,8 @@ export const adminResetPassword = (data: {
 }) => api.put("/auth/admin/reset-password", data);
 
 export const listUsers = () => api.get("/auth/users");
+export const toggleUserActive = (userId: number) =>
+  api.put(`/auth/admin/toggle-user/${userId}`);
 
 // Matches
 export const getMatches = (params?: {

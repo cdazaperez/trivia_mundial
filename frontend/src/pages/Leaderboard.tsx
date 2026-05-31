@@ -93,14 +93,32 @@ export default function Leaderboard() {
           <h3>Premios al Final del Mundial</h3>
           <div className="phase-winner-card">
             <p>Partidos finalizados: {phaseWinners.finished_matches || 0}/{phaseWinners.total_matches || 0}</p>
+            <p>
+              Participantes: {phaseWinners.active_participants || 0} |
+              Inscripción: ${phaseWinners.entry_fee || 50} |
+              <strong> Pozo total: ${phaseWinners.total_pool || 0} pesos</strong>
+            </p>
             {phaseWinners.tournament_finished && <p><strong>Torneo finalizado</strong></p>}
+
+            {phaseWinners.prizes && (
+              <div style={{ margin: "0.75rem 0", padding: "0.5rem", background: "#f0fdf4", borderRadius: "8px" }}>
+                {phaseWinners.prizes.map((p: any) => (
+                  <div key={p.place} style={{ fontSize: "0.85rem", padding: "2px 0" }}>
+                    {getMedal(p.place - 1)} {p.pct} = <strong>${p.amount} pesos</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div style={{ marginTop: "0.5rem" }}>
               {phaseWinners.top_3?.map((w: any, i: number) => (
                 <div key={i} className="winner-entry">
                   {getMedal(i)} {w.full_name} - {w.points} pts
-                  <span style={{ marginLeft: "0.5rem", color: "#6b7280", fontSize: "0.85rem" }}>
-                    ({["60%", "30%", "10%"][i]} del pozo)
-                  </span>
+                  {w.prize > 0 && (
+                    <span style={{ marginLeft: "0.5rem", color: "#166534", fontWeight: "bold", fontSize: "0.85rem" }}>
+                      (${w.prize} pesos)
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

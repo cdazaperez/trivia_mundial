@@ -254,9 +254,19 @@ def update_match_result(
 
     auto_generated = _try_auto_generate_next_phase(db, match.phase)
 
-    match_data = MatchResponse.model_validate(match).model_dump()
-    match_data["auto_generated"] = auto_generated
-    return match_data
+    response = {
+        "id": match.id,
+        "match_number": match.match_number,
+        "phase": match.phase.value if hasattr(match.phase, 'value') else match.phase,
+        "home_score": match.home_score,
+        "away_score": match.away_score,
+        "home_penalties": match.home_penalties,
+        "away_penalties": match.away_penalties,
+        "is_finished": match.is_finished,
+        "detail": "Resultado guardado y puntos calculados",
+        "auto_generated": auto_generated,
+    }
+    return response
 
 
 def _try_auto_generate_next_phase(db: Session, current_phase: str) -> dict | None:
