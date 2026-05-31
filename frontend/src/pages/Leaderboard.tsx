@@ -95,8 +95,8 @@ export default function Leaderboard() {
             <p>Partidos finalizados: {phaseWinners.finished_matches || 0}/{phaseWinners.total_matches || 0}</p>
             <p>
               Participantes: {phaseWinners.active_participants || 0} |
-              Inscripción: ${phaseWinners.entry_fee || 50} |
-              <strong> Pozo total: ${phaseWinners.total_pool || 0} pesos</strong>
+              Inscripción: ${(phaseWinners.entry_fee || 0).toLocaleString("es-CO")} |
+              <strong> Pozo total: ${(phaseWinners.total_pool || 0).toLocaleString("es-CO")} pesos</strong>
             </p>
             {phaseWinners.tournament_finished && <p><strong>Torneo finalizado</strong></p>}
 
@@ -104,7 +104,7 @@ export default function Leaderboard() {
               <div style={{ margin: "0.75rem 0", padding: "0.5rem", background: "#f0fdf4", borderRadius: "8px" }}>
                 {phaseWinners.prizes.map((p: any) => (
                   <div key={p.place} style={{ fontSize: "0.85rem", padding: "2px 0" }}>
-                    {getMedal(p.place - 1)} {p.pct} = <strong>${p.amount} pesos</strong>
+                    {getMedal(p.place - 1)} {p.pct} = <strong>${p.amount.toLocaleString("es-CO")} pesos</strong>
                   </div>
                 ))}
               </div>
@@ -116,7 +116,7 @@ export default function Leaderboard() {
                   {getMedal(i)} {w.full_name} - {w.points} pts
                   {w.prize > 0 && (
                     <span style={{ marginLeft: "0.5rem", color: "#166534", fontWeight: "bold", fontSize: "0.85rem" }}>
-                      (${w.prize} pesos)
+                      (${w.prize.toLocaleString("es-CO")} pesos)
                     </span>
                   )}
                 </div>

@@ -384,9 +384,9 @@ export default function Admin() {
       <div className="admin-section">
         <h3>Gestión de Participantes</h3>
         <p className="hint">
-          Bloquea o activa participantes. Valor inscripción: $50 pesos.
+          Bloquea o activa participantes. Valor inscripción: $50.000 pesos.
           Participantes activos: {users.filter((u) => u.is_active).length} |
-          Pozo total: ${users.filter((u) => u.is_active).length * 50} pesos
+          Pozo total: ${(users.filter((u) => u.is_active).length * 50000).toLocaleString("es-CO")} pesos
         </p>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
           <thead>
