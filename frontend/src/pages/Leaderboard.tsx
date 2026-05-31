@@ -57,6 +57,32 @@ export default function Leaderboard() {
         ))}
       </div>
 
+      {selectedPhase !== "" && (
+        <div style={{
+          background: "#eef2ff",
+          border: "1px solid #c7d2fe",
+          borderRadius: "8px",
+          padding: "0.75rem 1rem",
+          marginBottom: "1rem",
+          fontSize: "0.9rem",
+          color: "#4338ca",
+        }}>
+          Mostrando puntos solo de la fase: <strong>{PHASES.find(p => p.key === selectedPhase)?.label}</strong>.
+          Selecciona "General" para ver el acumulado total y los premios.
+        </div>
+      )}
+
+      {entries.length === 0 && selectedPhase !== "" && (
+        <div style={{
+          textAlign: "center",
+          padding: "2rem",
+          color: "#6b7280",
+          fontSize: "0.95rem",
+        }}>
+          No hay puntos registrados para esta fase. Los participantes aún no tienen pronósticos calificados en esta fase.
+        </div>
+      )}
+
       <table className="leaderboard-table">
         <thead>
           <tr>
@@ -88,7 +114,7 @@ export default function Leaderboard() {
         </tbody>
       </table>
 
-      {phaseWinners && (
+      {phaseWinners && selectedPhase === "" && (
         <div className="phase-winners-section">
           <h3>Premios al Final del Mundial</h3>
           <div className="phase-winner-card">

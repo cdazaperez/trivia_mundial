@@ -227,6 +227,9 @@ export default function Matches() {
 
                 {match.is_finished ? (
                   <div className="match-score-final">
+                    <span style={{ fontSize: "0.7rem", color: "#6b7280", display: "block" }}>
+                      Resultado oficial
+                    </span>
                     <span className="score">
                       {match.home_score} - {match.away_score}
                     </span>
@@ -235,12 +238,16 @@ export default function Matches() {
                         (Pen: {match.home_penalties}-{match.away_penalties})
                       </span>
                     )}
-                    {pred && (
+                    {pred ? (
                       <span
                         className={`points ${pred.points_earned > 0 ? "earned" : ""}`}
                       >
                         Tu pronóstico: {pred.home_score}-{pred.away_score} (
                         {pred.points_earned} pts)
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontStyle: "italic" }}>
+                        No hiciste pronóstico
                       </span>
                     )}
                   </div>
