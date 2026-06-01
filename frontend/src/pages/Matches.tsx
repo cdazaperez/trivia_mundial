@@ -288,85 +288,87 @@ export default function Matches() {
                     )}
                   </div>
                 ) : (
-                  <div className="match-prediction-input">
-                    <input
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={s.home}
-                      onChange={(e) =>
-                        setScores({
-                          ...scores,
-                          [match.id]: { ...s, home: e.target.value },
-                        })
-                      }
-                    />
-                    <span className="vs">-</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={s.away}
-                      onChange={(e) =>
-                        setScores({
-                          ...scores,
-                          [match.id]: { ...s, away: e.target.value },
-                        })
-                      }
-                    />
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={() => savePrediction(match.id)}
-                      disabled={saving === match.id}
-                    >
-                      {pred ? "Actualizar" : "Guardar"}
-                    </button>
-                  </div>
-                  {match.phase !== "group" && s.home !== "" && s.away !== "" && parseInt(s.home) === parseInt(s.away) && (
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.5rem",
-                      marginTop: "0.4rem",
-                      padding: "0.4rem 0.6rem",
-                      background: "#fefce8",
-                      border: "1px solid #fde68a",
-                      borderRadius: "6px",
-                      fontSize: "0.8rem",
-                    }}>
-                      <span style={{ color: "#92400e" }}>Penales:</span>
+                  <>
+                    <div className="match-prediction-input">
                       <input
                         type="number"
                         min="0"
                         max="20"
-                        value={s.homePen}
-                        placeholder="L"
-                        style={{ width: "45px", textAlign: "center" }}
+                        value={s.home}
                         onChange={(e) =>
                           setScores({
                             ...scores,
-                            [match.id]: { ...s, homePen: e.target.value },
+                            [match.id]: { ...s, home: e.target.value },
                           })
                         }
                       />
-                      <span style={{ color: "#92400e" }}>-</span>
+                      <span className="vs">-</span>
                       <input
                         type="number"
                         min="0"
                         max="20"
-                        value={s.awayPen}
-                        placeholder="V"
-                        style={{ width: "45px", textAlign: "center" }}
+                        value={s.away}
                         onChange={(e) =>
                           setScores({
                             ...scores,
-                            [match.id]: { ...s, awayPen: e.target.value },
+                            [match.id]: { ...s, away: e.target.value },
                           })
                         }
                       />
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => savePrediction(match.id)}
+                        disabled={saving === match.id}
+                      >
+                        {pred ? "Actualizar" : "Guardar"}
+                      </button>
                     </div>
-                  )}
+                    {match.phase !== "group" && s.home !== "" && s.away !== "" && parseInt(s.home) === parseInt(s.away) && (
+                      <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.5rem",
+                        marginTop: "0.4rem",
+                        padding: "0.4rem 0.6rem",
+                        background: "#fefce8",
+                        border: "1px solid #fde68a",
+                        borderRadius: "6px",
+                        fontSize: "0.8rem",
+                      }}>
+                        <span style={{ color: "#92400e" }}>Penales:</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="20"
+                          value={s.homePen}
+                          placeholder="L"
+                          style={{ width: "45px", textAlign: "center" }}
+                          onChange={(e) =>
+                            setScores({
+                              ...scores,
+                              [match.id]: { ...s, homePen: e.target.value },
+                            })
+                          }
+                        />
+                        <span style={{ color: "#92400e" }}>-</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="20"
+                          value={s.awayPen}
+                          placeholder="V"
+                          style={{ width: "45px", textAlign: "center" }}
+                          onChange={(e) =>
+                            setScores({
+                              ...scores,
+                              [match.id]: { ...s, awayPen: e.target.value },
+                            })
+                          }
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <div className="team away">
