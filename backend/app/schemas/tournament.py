@@ -42,6 +42,8 @@ class PredictionCreate(BaseModel):
     match_id: int
     home_score: int
     away_score: int
+    home_penalties: int | None = None
+    away_penalties: int | None = None
 
 
 class PredictionResponse(BaseModel):
@@ -49,6 +51,8 @@ class PredictionResponse(BaseModel):
     match_id: int
     home_score: int
     away_score: int
+    home_penalties: int | None = None
+    away_penalties: int | None = None
     points_earned: int
     match: MatchResponse | None = None
 

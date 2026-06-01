@@ -57,6 +57,8 @@ class MatchPrediction(Base):
     match_id = Column(Integer, ForeignKey("matches.id"), nullable=False)
     home_score = Column(Integer, nullable=False)
     away_score = Column(Integer, nullable=False)
+    home_penalties = Column(Integer, nullable=True)
+    away_penalties = Column(Integer, nullable=True)
     points_earned = Column(Integer, default=0)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

@@ -133,6 +133,11 @@ export default function Leaderboard() {
                     {getMedal(p.place - 1)} {p.pct} = <strong>${p.amount.toLocaleString("es-CO")} pesos</strong>
                   </div>
                 ))}
+                {phaseWinners.admin_fee != null && (
+                  <div style={{ fontSize: "0.85rem", padding: "2px 0", color: "#6b7280", borderTop: "1px solid #d1fae5", marginTop: "4px", paddingTop: "4px" }}>
+                    Administración: {phaseWinners.admin_fee_pct} = <strong>${(phaseWinners.admin_fee || 0).toLocaleString("es-CO")} pesos</strong>
+                  </div>
+                )}
               </div>
             )}
 

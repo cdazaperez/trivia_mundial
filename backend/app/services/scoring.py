@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.config import (
     POINTS_EXACT_SCORE,
     POINTS_CORRECT_RESULT,
+    POINTS_PENALTY_WINNER,
     POINTS_GROUP_QUALIFIER,
     POINTS_GROUP_FIRST,
     POINTS_CHAMPION,
@@ -24,16 +25,27 @@ def calculate_points_for_match(db: Session, match: Match):
 
     actual_home = match.home_score
     actual_away = match.away_score
+    is_knockout = match.phase != Phase.GROUP
+    actual_went_to_penalties = (
+        is_knockout
+        and actual_home == actual_away
+        and match.home_penalties is not None
+        and match.away_penalties is not None
+    )
 
     for pred in predictions:
         points = 0
 
         if pred.home_score == actual_home and pred.away_score == actual_away:
-            # Exact score match
             points = POINTS_EXACT_SCORE
         elif _same_result(pred.home_score, pred.away_score, actual_home, actual_away):
-            # Correct result (win/draw) but wrong score
             points = POINTS_CORRECT_RESULT
+
+        if actual_went_to_penalties and pred.home_penalties is not None and pred.away_penalties is not None:
+            pred_pen_winner = "home" if pred.home_penalties > pred.away_penalties else "away"
+            actual_pen_winner = "home" if match.home_penalties > match.away_penalties else "away"
+            if pred_pen_winner == actual_pen_winner:
+                points += POINTS_PENALTY_WINNER
 
         pred.points_earned = points
 

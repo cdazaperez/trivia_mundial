@@ -96,9 +96,33 @@ def create_match_prediction(
         MatchPrediction.match_id == prediction.match_id,
     ).first()
 
+    is_knockout = match.phase != Phase.GROUP
+    is_draw = prediction.home_score == prediction.away_score
+
+    pen_home = None
+    pen_away = None
+    if is_knockout and is_draw:
+        if prediction.home_penalties is None or prediction.away_penalties is None:
+            raise HTTPException(
+                status_code=400,
+                detail="En fase eliminatoria, si pronosticas empate debes incluir resultado de penales.",
+            )
+        if prediction.home_penalties == prediction.away_penalties:
+            raise HTTPException(
+                status_code=400,
+                detail="Los penales no pueden terminar empatados.",
+            )
+        pen_home = prediction.home_penalties
+        pen_away = prediction.away_penalties
+    elif is_knockout and not is_draw:
+        pen_home = None
+        pen_away = None
+
     if existing:
         existing.home_score = prediction.home_score
         existing.away_score = prediction.away_score
+        existing.home_penalties = pen_home
+        existing.away_penalties = pen_away
         existing.updated_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(existing)
@@ -109,6 +133,8 @@ def create_match_prediction(
         match_id=prediction.match_id,
         home_score=prediction.home_score,
         away_score=prediction.away_score,
+        home_penalties=pen_home,
+        away_penalties=pen_away,
     )
     db.add(new_prediction)
     db.commit()

@@ -73,6 +73,8 @@ export const createPrediction = (data: {
   match_id: number;
   home_score: number;
   away_score: number;
+  home_penalties?: number;
+  away_penalties?: number;
 }) => api.post("/predictions/match", data);
 
 export const getMyPredictions = (phase?: string) =>

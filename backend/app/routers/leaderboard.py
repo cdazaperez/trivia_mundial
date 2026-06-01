@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from app.core.config import ENTRY_FEE, PRIZE_DISTRIBUTION
+from app.core.config import ENTRY_FEE, PRIZE_DISTRIBUTION, ADMIN_FEE_PCT
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
@@ -110,6 +110,8 @@ def get_phase_winners(
 
     active_participants = len(users)
     total_pool = active_participants * ENTRY_FEE
+    admin_fee = int(total_pool * ADMIN_FEE_PCT)
+    prize_pool = total_pool - admin_fee
     prizes = [
         {"place": i + 1, "pct": f"{int(pct * 100)}%", "amount": int(total_pool * pct)}
         for i, pct in enumerate(PRIZE_DISTRIBUTION)
@@ -127,6 +129,9 @@ def get_phase_winners(
         "active_participants": active_participants,
         "entry_fee": ENTRY_FEE,
         "total_pool": total_pool,
+        "admin_fee": admin_fee,
+        "admin_fee_pct": f"{int(ADMIN_FEE_PCT * 100)}%",
+        "prize_pool": prize_pool,
         "prizes": prizes,
         "top_3": top_3,
     }

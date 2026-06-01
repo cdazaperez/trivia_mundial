@@ -37,6 +37,8 @@ export interface Prediction {
   match_id: number;
   home_score: number;
   away_score: number;
+  home_penalties: number | null;
+  away_penalties: number | null;
   points_earned: number;
   match?: Match;
 }

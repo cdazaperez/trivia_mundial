@@ -17,6 +17,7 @@ PREDICTION_LOCK_HOURS_BEFORE = 24
 # Scoring
 POINTS_EXACT_SCORE = 3
 POINTS_CORRECT_RESULT = 1  # Right winner/draw but wrong score
+POINTS_PENALTY_WINNER = 1  # Correctly predicted penalty winner in knockout
 POINTS_GROUP_QUALIFIER = 2  # Correctly predicted a team advances from group
 POINTS_GROUP_FIRST = 3     # Correctly predicted 1st place in group
 POINTS_CHAMPION = 10
@@ -26,4 +27,5 @@ POINTS_MVP = 5
 
 # Entry fee and prize distribution
 ENTRY_FEE = 50000  # pesos per participant
-PRIZE_DISTRIBUTION = [0.60, 0.30, 0.10]  # 1st, 2nd, 3rd
+PRIZE_DISTRIBUTION = [0.60, 0.25, 0.10]  # 1st, 2nd, 3rd
+ADMIN_FEE_PCT = 0.05  # 5% servicios de administración

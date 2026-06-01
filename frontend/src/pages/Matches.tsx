@@ -27,7 +27,7 @@ export default function Matches() {
   const [selectedPhase, setSelectedPhase] = useState<string>("group");
   const [selectedGroup, setSelectedGroup] = useState<string>("A");
   const [scores, setScores] = useState<
-    Record<number, { home: string; away: string }>
+    Record<number, { home: string; away: string; homePen: string; awayPen: string }>
   >({});
   const [saving, setSaving] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
@@ -76,12 +76,14 @@ export default function Matches() {
       });
       setPredictions(predMap);
 
-      const initScores: Record<number, { home: string; away: string }> = {};
+      const initScores: Record<number, { home: string; away: string; homePen: string; awayPen: string }> = {};
       matchRes.data.forEach((m: Match) => {
         const pred = predMap[m.id];
         initScores[m.id] = {
           home: pred ? String(pred.home_score) : "",
           away: pred ? String(pred.away_score) : "",
+          homePen: pred?.home_penalties != null ? String(pred.home_penalties) : "",
+          awayPen: pred?.away_penalties != null ? String(pred.away_penalties) : "",
         };
       });
       setScores(initScores);
@@ -94,15 +96,32 @@ export default function Matches() {
     const s = scores[matchId];
     if (s.home === "" || s.away === "") return;
 
+    const homeScore = parseInt(s.home);
+    const awayScore = parseInt(s.away);
+    const match = matches.find((m) => m.id === matchId);
+    const isKnockout = match && match.phase !== "group";
+    const isDraw = homeScore === awayScore;
+
+    const payload: any = {
+      match_id: matchId,
+      home_score: homeScore,
+      away_score: awayScore,
+    };
+
+    if (isKnockout && isDraw) {
+      if (s.homePen === "" || s.awayPen === "") {
+        setMsg("En eliminatoria con empate, debes ingresar los penales.");
+        return;
+      }
+      payload.home_penalties = parseInt(s.homePen);
+      payload.away_penalties = parseInt(s.awayPen);
+    }
+
     setSaving(matchId);
     setMsg("");
     try {
-      await createPrediction({
-        match_id: matchId,
-        home_score: parseInt(s.home),
-        away_score: parseInt(s.away),
-      });
-      setMsg("Pronostico guardado");
+      await createPrediction(payload);
+      setMsg("Pronóstico guardado");
       loadData();
     } catch (err: any) {
       setMsg(err.response?.data?.detail || "Error al guardar");
@@ -196,7 +215,7 @@ export default function Matches() {
       <div className="matches-list">
         {matches.map((match) => {
           const pred = predictions[match.id];
-          const s = scores[match.id] || { home: "", away: "" };
+          const s = scores[match.id] || { home: "", away: "", homePen: "", awayPen: "" };
           const matchTime = new Date(match.match_date).getTime();
           const now = Date.now();
           const isLocked = !match.is_finished && now >= matchTime - 60 * 60 * 1000;
@@ -242,8 +261,11 @@ export default function Matches() {
                       <span
                         className={`points ${pred.points_earned > 0 ? "earned" : ""}`}
                       >
-                        Tu pronóstico: {pred.home_score}-{pred.away_score} (
-                        {pred.points_earned} pts)
+                        Tu pronóstico: {pred.home_score}-{pred.away_score}
+                        {pred.home_penalties != null && pred.away_penalties != null && (
+                          <> (Pen: {pred.home_penalties}-{pred.away_penalties})</>
+                        )}
+                        {" "}({pred.points_earned} pts)
                       </span>
                     ) : (
                       <span style={{ fontSize: "0.75rem", color: "#9ca3af", fontStyle: "italic" }}>
@@ -259,6 +281,9 @@ export default function Matches() {
                     {pred && (
                       <span className="points">
                         Tu pronóstico: {pred.home_score}-{pred.away_score}
+                        {pred.home_penalties != null && pred.away_penalties != null && (
+                          <> (Pen: {pred.home_penalties}-{pred.away_penalties})</>
+                        )}
                       </span>
                     )}
                   </div>
@@ -297,6 +322,51 @@ export default function Matches() {
                       {pred ? "Actualizar" : "Guardar"}
                     </button>
                   </div>
+                  {match.phase !== "group" && s.home !== "" && s.away !== "" && parseInt(s.home) === parseInt(s.away) && (
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.5rem",
+                      marginTop: "0.4rem",
+                      padding: "0.4rem 0.6rem",
+                      background: "#fefce8",
+                      border: "1px solid #fde68a",
+                      borderRadius: "6px",
+                      fontSize: "0.8rem",
+                    }}>
+                      <span style={{ color: "#92400e" }}>Penales:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="20"
+                        value={s.homePen}
+                        placeholder="L"
+                        style={{ width: "45px", textAlign: "center" }}
+                        onChange={(e) =>
+                          setScores({
+                            ...scores,
+                            [match.id]: { ...s, homePen: e.target.value },
+                          })
+                        }
+                      />
+                      <span style={{ color: "#92400e" }}>-</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="20"
+                        value={s.awayPen}
+                        placeholder="V"
+                        style={{ width: "45px", textAlign: "center" }}
+                        onChange={(e) =>
+                          setScores({
+                            ...scores,
+                            [match.id]: { ...s, awayPen: e.target.value },
+                          })
+                        }
+                      />
+                    </div>
+                  )}
                 )}
 
                 <div className="team away">

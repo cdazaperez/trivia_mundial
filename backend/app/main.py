@@ -14,11 +14,17 @@ Base.metadata.create_all(bind=engine)
 
 # Add new columns if missing (lightweight migration for SQLite)
 with engine.connect() as conn:
-    columns = [col["name"] for col in inspect(engine).get_columns("matches")]
-    if "home_penalties" not in columns:
+    match_cols = [col["name"] for col in inspect(engine).get_columns("matches")]
+    if "home_penalties" not in match_cols:
         conn.execute(text("ALTER TABLE matches ADD COLUMN home_penalties INTEGER"))
-    if "away_penalties" not in columns:
+    if "away_penalties" not in match_cols:
         conn.execute(text("ALTER TABLE matches ADD COLUMN away_penalties INTEGER"))
+
+    pred_cols = [col["name"] for col in inspect(engine).get_columns("match_predictions")]
+    if "home_penalties" not in pred_cols:
+        conn.execute(text("ALTER TABLE match_predictions ADD COLUMN home_penalties INTEGER"))
+    if "away_penalties" not in pred_cols:
+        conn.execute(text("ALTER TABLE match_predictions ADD COLUMN away_penalties INTEGER"))
     conn.commit()
 
 app = FastAPI(
