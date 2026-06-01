@@ -34,8 +34,8 @@ def get_leaderboard(
 
         match_predictions = match_query.all()
         match_points = sum(p.points_earned for p in match_predictions)
-        exact_scores = sum(1 for p in match_predictions if p.points_earned == 3)
-        correct_results = sum(1 for p in match_predictions if p.points_earned == 1)
+        exact_scores = sum(1 for p in match_predictions if p.points_earned >= 3)
+        correct_results = sum(1 for p in match_predictions if 0 < p.points_earned < 3)
 
         # Group prediction points
         group_points = 0
