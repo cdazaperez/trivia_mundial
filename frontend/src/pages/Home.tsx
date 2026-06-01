@@ -51,6 +51,7 @@ export default function Home() {
           <tbody>
             <tr><td>Marcador exacto</td><td className="pts">+3 pts</td></tr>
             <tr><td>Resultado correcto (ganador/empate)</td><td className="pts">+1 pt</td></tr>
+            <tr><td>Acertar ganador de penales (eliminatoria)</td><td className="pts">+1 pt</td></tr>
             <tr><td>Acertar clasificado de grupo</td><td className="pts">+2 pts</td></tr>
             <tr><td>Acertar 1ro del grupo</td><td className="pts">+3 pts</td></tr>
             <tr><td>Acertar campeón</td><td className="pts">+10 pts</td></tr>
@@ -68,6 +69,7 @@ export default function Home() {
           <li>Los pronósticos de grupos se bloquean <strong>24 horas antes</strong> del inicio del mundial</li>
           <li>Las apuestas bonus se pueden modificar hasta antes de la fase eliminatoria</li>
           <li>En eliminatorias se puede apostar en los nuevos partidos generados</li>
+          <li>En eliminatorias, si pronosticas empate debes incluir <strong>resultado de penales</strong></li>
           <li>Los puntos se <strong>acumulan</strong> durante todo el mundial</li>
           <li>Los pronósticos de otros jugadores se ven después de que termine el partido</li>
         </ul>
@@ -77,9 +79,11 @@ export default function Home() {
         <h3>Premios</h3>
         <ul>
           <li>Los ganadores se definen al <strong>terminar el mundial</strong> (no por fase)</li>
+          <li>Inscripción: <strong>$50.000 pesos</strong> por participante</li>
           <li>1er lugar: <strong>60%</strong> del pozo recaudado</li>
-          <li>2do lugar: <strong>30%</strong> del pozo recaudado</li>
+          <li>2do lugar: <strong>25%</strong> del pozo recaudado</li>
           <li>3er lugar: <strong>10%</strong> del pozo recaudado</li>
+          <li>Administración: <strong>5%</strong> del pozo recaudado</li>
         </ul>
       </div>
     </div>
