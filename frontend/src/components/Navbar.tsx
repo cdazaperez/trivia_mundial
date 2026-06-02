@@ -15,7 +15,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">Trivia Mundial 2026</Link>
+        <Link to="/">Trivia Mundial 2026 - Amigos</Link>
       </div>
       <div className="navbar-links">
         {!user.is_admin && (

@@ -28,8 +28,8 @@ with engine.connect() as conn:
     conn.commit()
 
 app = FastAPI(
-    title="Trivia Mundial 2026",
-    description="App de pronósticos para el Mundial de Fútbol 2026",
+    title="Trivia Mundial 2026 - Amigos",
+    description="Plataforma de entretenimiento entre amigos - Pronósticos del Mundial FIFA 2026",
     version="1.0.0",
 )
 
@@ -62,4 +62,4 @@ def startup():
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "app": "Trivia Mundial 2026"}
+    return {"status": "ok", "app": "Trivia Mundial 2026 - Amigos"}

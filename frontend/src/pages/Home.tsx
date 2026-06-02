@@ -7,9 +7,12 @@ export default function Home() {
   return (
     <div className="page home-page">
       <div className="hero">
-        <h1>Trivia Mundial 2026</h1>
+        <h1>Trivia Mundial 2026 - Amigos</h1>
         <p className="subtitle">
           ¡Pronostica los resultados del Mundial FIFA 2026 y compite con tus amigos!
+        </p>
+        <p style={{ fontSize: "0.85rem", color: "#6b7280", marginTop: "0.25rem" }}>
+          Plataforma de entretenimiento entre amigos. No es un sitio de apuestas profesional.
         </p>
       </div>
 
@@ -84,6 +87,38 @@ export default function Home() {
           <li>2do lugar: <strong>25%</strong> del pozo recaudado</li>
           <li>3er lugar: <strong>10%</strong> del pozo recaudado</li>
           <li>Administración: <strong>5%</strong> del pozo recaudado</li>
+        </ul>
+      </div>
+
+      <div className="disclaimer-section" style={{
+        marginTop: "2rem",
+        padding: "1.25rem",
+        background: "#f9fafb",
+        border: "1px solid #e5e7eb",
+        borderRadius: "8px",
+        fontSize: "0.8rem",
+        color: "#6b7280",
+        lineHeight: "1.6",
+      }}>
+        <h4 style={{ color: "#374151", marginBottom: "0.75rem", fontSize: "0.9rem" }}>
+          Aviso Legal y Condiciones de Participación
+        </h4>
+        <p style={{ marginBottom: "0.5rem" }}>
+          Esta plataforma es con fines de <strong>entretenimiento entre amigos</strong>. No constituye un sitio de apuestas profesional ni está regulada como tal.
+        </p>
+        <ul style={{ paddingLeft: "1.25rem", margin: "0.5rem 0" }}>
+          <li style={{ marginBottom: "0.4rem" }}>
+            La plataforma se reserva el derecho de <strong>bloquear cuentas y retener premios</strong> si se detecta fraude, suplantación de identidad o uso de múltiples cuentas para manipular el concurso.
+          </li>
+          <li style={{ marginBottom: "0.4rem" }}>
+            El pago de la inscripción (<strong>$50.000 pesos</strong>) es definitivo. <strong>No se realizarán reembolsos</strong> bajo ninguna circunstancia una vez que el usuario haya ingresado sus predicciones y el torneo o partido haya comenzado. El pago debe estar al día antes de iniciar el campeonato.
+          </li>
+          <li style={{ marginBottom: "0.4rem" }}>
+            Los resultados válidos para calcular los puntajes serán única y exclusivamente los publicados por la entidad oficial organizadora del evento (<strong>FIFA</strong>).
+          </li>
+          <li style={{ marginBottom: "0.4rem" }}>
+            La plataforma <strong>no se hace responsable</strong> si un usuario no puede ingresar sus predicciones a tiempo debido a fallas en su conexión a internet o caídas temporales del servidor. Las predicciones tienen una <strong>hora de cierre estricta</strong>.
+          </li>
         </ul>
       </div>
     </div>

@@ -30,7 +30,7 @@ export default function Login() {
           <div className="mascot mascot-zayu">🐆<span>Zayu</span></div>
           <div className="mascot mascot-clutch">🦅<span>Clutch</span></div>
         </div>
-        <h1>Trivia Mundial 2026</h1>
+        <h1>Trivia Mundial 2026 - Amigos</h1>
         <p className="auth-subtitle">FIFA World Cup Canada/Mexico/USA</p>
         <h2>Iniciar Sesion</h2>
         {error && <div className="error-msg">{error}</div>}
