@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import verify_password, get_password_hash, create_access_token, get_current_user, get_admin_user
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, Token, LoginRequest, PasswordChange, AdminPasswordReset
+from app.schemas.user import UserCreate, UserResponse, Token, LoginRequest, PasswordChange, AdminPasswordReset, AdminUserUpdate
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -136,3 +136,41 @@ def toggle_user_payment(
     db.commit()
     status = "pagado" if user.has_paid else "pendiente"
     return {"detail": f"Pago de {user.username}: {status}", "has_paid": user.has_paid}
+
+
+@router.put("/admin/update-user/{user_id}", response_model=UserResponse)
+def admin_update_user(
+    user_id: int,
+    data: AdminUserUpdate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Update a user's profile data (username, email, full_name). Admin only."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if user.is_admin:
+        raise HTTPException(status_code=400, detail="No se puede editar a un administrador desde aquí")
+
+    if data.username is not None and data.username != user.username:
+        if len(data.username.strip()) < 3:
+            raise HTTPException(status_code=400, detail="El usuario debe tener al menos 3 caracteres")
+        existing = db.query(User).filter(User.username == data.username, User.id != user_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail=f"El usuario '{data.username}' ya existe")
+        user.username = data.username.strip()
+
+    if data.email is not None and data.email != user.email:
+        existing = db.query(User).filter(User.email == data.email, User.id != user_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail=f"El email '{data.email}' ya está registrado")
+        user.email = data.email.strip()
+
+    if data.full_name is not None and data.full_name != user.full_name:
+        if len(data.full_name.strip()) < 2:
+            raise HTTPException(status_code=400, detail="El nombre debe tener al menos 2 caracteres")
+        user.full_name = data.full_name.strip()
+
+    db.commit()
+    db.refresh(user)
+    return user

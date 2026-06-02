@@ -53,6 +53,11 @@ export const toggleUserActive = (userId: number) =>
   api.put(`/auth/admin/toggle-user/${userId}`);
 export const toggleUserPayment = (userId: number) =>
   api.put(`/auth/admin/toggle-payment/${userId}`);
+export const adminUpdateUser = (userId: number, data: {
+  username?: string;
+  email?: string;
+  full_name?: string;
+}) => api.put(`/auth/admin/update-user/${userId}`, data);
 
 // Matches
 export const getMatches = (params?: {

@@ -6,6 +6,7 @@ import {
   listUsers,
   toggleUserActive,
   toggleUserPayment,
+  adminUpdateUser,
   resetAllResults,
   reseedData,
   updateTeams,
@@ -69,6 +70,11 @@ export default function Admin() {
   // Update teams
   const [updateTeamsMsg, setUpdateTeamsMsg] = useState("");
   const [updatingTeams, setUpdatingTeams] = useState(false);
+
+  // Edit user
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({ username: "", email: "", full_name: "" });
+  const [editMsg, setEditMsg] = useState("");
 
   // Reseed
   const [showReseedConfirm, setShowReseedConfirm] = useState(false);
@@ -250,6 +256,25 @@ export default function Admin() {
       loadKnockoutStatus();
     } catch (err: any) {
       setReseedMsg(err.response?.data?.detail || "Error al re-seedear");
+    }
+  };
+
+  const startEditUser = (u: User) => {
+    setEditingUser(u);
+    setEditForm({ username: u.username, email: u.email, full_name: u.full_name });
+    setEditMsg("");
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+    setEditMsg("");
+    try {
+      await adminUpdateUser(editingUser.id, editForm);
+      setEditMsg("Usuario actualizado");
+      setEditingUser(null);
+      loadUsers();
+    } catch (err: any) {
+      setEditMsg(err.response?.data?.detail || "Error al actualizar");
     }
   };
 
@@ -445,7 +470,14 @@ export default function Admin() {
                     {u.is_active ? "Activo" : "Bloqueado"}
                   </span>
                 </td>
-                <td style={{ padding: "0.5rem", display: "flex", gap: "0.25rem" }}>
+                <td style={{ padding: "0.5rem", display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => startEditUser(u)}
+                    style={{ fontSize: "0.7rem", padding: "2px 8px", background: "#3b82f6", color: "white" }}
+                  >
+                    Editar
+                  </button>
                   <button
                     className={`btn btn-sm ${u.has_paid ? "" : "btn-primary"}`}
                     onClick={async () => {
@@ -484,6 +516,70 @@ export default function Admin() {
             ))}
           </tbody>
         </table>
+
+        {editingUser && (
+          <div style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            background: "#eff6ff",
+            border: "1px solid #bfdbfe",
+            borderRadius: "8px",
+          }}>
+            <h4 style={{ marginBottom: "0.75rem" }}>
+              Editar usuario: @{editingUser.username}
+            </h4>
+            {editMsg && (
+              <div style={{
+                marginBottom: "0.5rem",
+                padding: "0.4rem 0.75rem",
+                borderRadius: "6px",
+                fontSize: "0.85rem",
+                background: editMsg.includes("Error") ? "#fee2e2" : "#dcfce7",
+                color: editMsg.includes("Error") ? "#991b1b" : "#166534",
+              }}>
+                {editMsg}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "flex-end" }}>
+              <div className="form-group" style={{ flex: 1, minWidth: "140px" }}>
+                <label style={{ fontSize: "0.8rem" }}>Usuario</label>
+                <input
+                  type="text"
+                  value={editForm.username}
+                  onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1, minWidth: "140px" }}>
+                <label style={{ fontSize: "0.8rem" }}>Nombre completo</label>
+                <input
+                  type="text"
+                  value={editForm.full_name}
+                  onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1, minWidth: "180px" }}>
+                <label style={{ fontSize: "0.8rem" }}>Email</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                />
+              </div>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button className="btn btn-primary btn-sm" onClick={handleSaveUser}>
+                  Guardar
+                </button>
+                <button
+                  className="btn btn-sm"
+                  onClick={() => setEditingUser(null)}
+                  style={{ background: "#6b7280", color: "white" }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* === UPDATE TEAMS === */}

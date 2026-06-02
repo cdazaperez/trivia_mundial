@@ -38,3 +38,9 @@ class PasswordChange(BaseModel):
 class AdminPasswordReset(BaseModel):
     username: str
     new_password: str
+
+
+class AdminUserUpdate(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    full_name: str | None = None
