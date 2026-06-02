@@ -121,6 +121,7 @@ export default function Leaderboard() {
             <p>Partidos finalizados: {phaseWinners.finished_matches || 0}/{phaseWinners.total_matches || 0}</p>
             <p>
               Participantes: {phaseWinners.active_participants || 0} |
+              Pagados: {phaseWinners.paid_participants || 0} |
               Inscripción: ${(phaseWinners.entry_fee || 0).toLocaleString("es-CO")} |
               <strong> Pozo total: ${(phaseWinners.total_pool || 0).toLocaleString("es-CO")} pesos</strong>
             </p>

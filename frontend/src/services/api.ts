@@ -51,6 +51,8 @@ export const adminResetPassword = (data: {
 export const listUsers = () => api.get("/auth/users");
 export const toggleUserActive = (userId: number) =>
   api.put(`/auth/admin/toggle-user/${userId}`);
+export const toggleUserPayment = (userId: number) =>
+  api.put(`/auth/admin/toggle-payment/${userId}`);
 
 // Matches
 export const getMatches = (params?: {

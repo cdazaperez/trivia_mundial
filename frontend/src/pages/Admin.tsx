@@ -5,6 +5,7 @@ import {
   adminResetPassword,
   listUsers,
   toggleUserActive,
+  toggleUserPayment,
   resetAllResults,
   reseedData,
   updateTeams,
@@ -384,18 +385,33 @@ export default function Admin() {
       <div className="admin-section">
         <h3>Gestión de Participantes</h3>
         <p className="hint">
-          Bloquea o activa participantes. Valor inscripción: $50.000 pesos.
+          Valor inscripción: $50.000 pesos.
           Participantes activos: {users.filter((u) => u.is_active).length} |
-          Pozo total: ${(users.filter((u) => u.is_active).length * 50000).toLocaleString("es-CO")} pesos
+          Pagados: {users.filter((u) => u.has_paid).length}/{users.length} |
+          Pozo total: ${(users.filter((u) => u.has_paid).length * 50000).toLocaleString("es-CO")} pesos
         </p>
+        {users.filter((u) => u.is_active && !u.has_paid).length > 0 && (
+          <div style={{
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: "8px",
+            padding: "0.5rem 0.75rem",
+            marginBottom: "0.75rem",
+            fontSize: "0.85rem",
+            color: "#991b1b",
+          }}>
+            {users.filter((u) => u.is_active && !u.has_paid).length} participante(s) activo(s) sin pagar
+          </div>
+        )}
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
               <th style={{ padding: "0.5rem" }}>Usuario</th>
               <th style={{ padding: "0.5rem" }}>Nombre</th>
               <th style={{ padding: "0.5rem" }}>Email</th>
+              <th style={{ padding: "0.5rem" }}>Pago</th>
               <th style={{ padding: "0.5rem" }}>Estado</th>
-              <th style={{ padding: "0.5rem" }}>Acción</th>
+              <th style={{ padding: "0.5rem" }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -412,13 +428,43 @@ export default function Admin() {
                     padding: "2px 8px",
                     borderRadius: "12px",
                     fontSize: "0.75rem",
+                    background: u.has_paid ? "#dcfce7" : "#fef9c3",
+                    color: u.has_paid ? "#166534" : "#854d0e",
+                  }}>
+                    {u.has_paid ? "Pagado" : "Pendiente"}
+                  </span>
+                </td>
+                <td style={{ padding: "0.5rem" }}>
+                  <span style={{
+                    padding: "2px 8px",
+                    borderRadius: "12px",
+                    fontSize: "0.75rem",
                     background: u.is_active ? "#dcfce7" : "#fee2e2",
                     color: u.is_active ? "#166534" : "#991b1b",
                   }}>
                     {u.is_active ? "Activo" : "Bloqueado"}
                   </span>
                 </td>
-                <td style={{ padding: "0.5rem" }}>
+                <td style={{ padding: "0.5rem", display: "flex", gap: "0.25rem" }}>
+                  <button
+                    className={`btn btn-sm ${u.has_paid ? "" : "btn-primary"}`}
+                    onClick={async () => {
+                      try {
+                        await toggleUserPayment(u.id);
+                        loadUsers();
+                      } catch (err: any) {
+                        setMsg(err.response?.data?.detail || "Error");
+                      }
+                    }}
+                    style={{
+                      fontSize: "0.7rem",
+                      padding: "2px 8px",
+                      background: u.has_paid ? "#6b7280" : undefined,
+                      color: u.has_paid ? "white" : undefined,
+                    }}
+                  >
+                    {u.has_paid ? "Quitar pago" : "Marcar pagado"}
+                  </button>
                   <button
                     className={`btn btn-sm ${u.is_active ? "btn-danger" : "btn-primary"}`}
                     onClick={async () => {
@@ -429,7 +475,7 @@ export default function Admin() {
                         setMsg(err.response?.data?.detail || "Error");
                       }
                     }}
-                    style={{ fontSize: "0.75rem", padding: "2px 10px" }}
+                    style={{ fontSize: "0.7rem", padding: "2px 8px" }}
                   >
                     {u.is_active ? "Bloquear" : "Activar"}
                   </button>

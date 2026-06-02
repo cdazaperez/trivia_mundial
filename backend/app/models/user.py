@@ -15,6 +15,7 @@ class User(Base):
     full_name = Column(String(100), nullable=False)
     is_admin = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
+    has_paid = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     predictions = relationship("MatchPrediction", back_populates="user")

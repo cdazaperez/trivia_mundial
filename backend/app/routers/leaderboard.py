@@ -109,7 +109,8 @@ def get_phase_winners(
     entries.sort(key=lambda e: e["points"], reverse=True)
 
     active_participants = len(users)
-    total_pool = active_participants * ENTRY_FEE
+    paid_participants = sum(1 for u in users if u.has_paid)
+    total_pool = paid_participants * ENTRY_FEE
     admin_fee = int(total_pool * ADMIN_FEE_PCT)
     prize_pool = total_pool - admin_fee
     prizes = [
@@ -127,6 +128,7 @@ def get_phase_winners(
         "total_matches": total_matches,
         "finished_matches": finished_matches,
         "active_participants": active_participants,
+        "paid_participants": paid_participants,
         "entry_fee": ENTRY_FEE,
         "total_pool": total_pool,
         "admin_fee": admin_fee,

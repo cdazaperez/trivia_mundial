@@ -20,6 +20,10 @@ with engine.connect() as conn:
     if "away_penalties" not in match_cols:
         conn.execute(text("ALTER TABLE matches ADD COLUMN away_penalties INTEGER"))
 
+    user_cols = [col["name"] for col in inspect(engine).get_columns("users")]
+    if "has_paid" not in user_cols:
+        conn.execute(text("ALTER TABLE users ADD COLUMN has_paid BOOLEAN DEFAULT 0"))
+
     pred_cols = [col["name"] for col in inspect(engine).get_columns("match_predictions")]
     if "home_penalties" not in pred_cols:
         conn.execute(text("ALTER TABLE match_predictions ADD COLUMN home_penalties INTEGER"))

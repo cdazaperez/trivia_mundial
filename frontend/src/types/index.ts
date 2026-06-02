@@ -5,6 +5,7 @@ export interface User {
   full_name: string;
   is_admin: boolean;
   is_active: boolean;
+  has_paid: boolean;
 }
 
 export interface Team {
