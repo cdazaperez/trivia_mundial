@@ -111,7 +111,10 @@ export default function Home() {
             La plataforma se reserva el derecho de <strong>bloquear cuentas y retener premios</strong> si se detecta fraude, suplantación de identidad o uso de múltiples cuentas para manipular el concurso.
           </li>
           <li style={{ marginBottom: "0.4rem" }}>
-            El pago de la inscripción (<strong>$50.000 pesos</strong>) es definitivo. <strong>No se realizarán reembolsos</strong> bajo ninguna circunstancia una vez que el usuario haya ingresado sus predicciones y el torneo o partido haya comenzado. El pago debe estar al día antes de iniciar el campeonato.
+            El pago de la inscripción (<strong>$50.000 pesos</strong>) es definitivo. <strong>No se realizarán reembolsos</strong> bajo ninguna circunstancia una vez que el usuario haya ingresado sus predicciones y el torneo o partido haya comenzado.
+          </li>
+          <li style={{ marginBottom: "0.4rem" }}>
+            El pago debe realizarse por <strong>Nequi</strong> al número <strong>3107789035</strong> o con la llave <strong>@NEQUIHER215</strong>, a más tardar <strong>un día antes del inicio del mundial (10 de junio de 2026)</strong>. Sin pago confirmado no se habilitará la participación.
           </li>
           <li style={{ marginBottom: "0.4rem" }}>
             Los resultados válidos para calcular los puntajes serán única y exclusivamente los publicados por la entidad oficial organizadora del evento (<strong>FIFA</strong>).
