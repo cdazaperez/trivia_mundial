@@ -58,16 +58,16 @@ def check_bonus_predictions_locked(db: Session):
 
 
 def check_match_prediction_locked(match: Match):
-    """Check if a specific match prediction is locked (1h before match starts)."""
+    """Check if a specific match prediction is locked (10 min before match starts)."""
     if match.match_date.tzinfo is None:
         match_date = match.match_date.replace(tzinfo=timezone.utc)
     else:
         match_date = match.match_date
-    lock_time = match_date - timedelta(hours=1)
+    lock_time = match_date - timedelta(minutes=10)
     if datetime.now(timezone.utc) >= lock_time:
         raise HTTPException(
             status_code=403,
-            detail="No se puede modificar el pronóstico 1 hora antes del partido.",
+            detail="No se puede modificar el pronóstico 10 minutos antes del partido.",
         )
 
 

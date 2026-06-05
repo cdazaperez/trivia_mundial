@@ -68,7 +68,7 @@ export default function Home() {
       <div className="rules-info">
         <h3>Reglas</h3>
         <ul>
-          <li>Los pronósticos de marcadores se bloquean <strong>1 hora antes</strong> de cada partido</li>
+          <li>Los pronósticos de marcadores se bloquean <strong>10 minutos antes</strong> de cada partido</li>
           <li>Los pronósticos de grupos se bloquean <strong>24 horas antes</strong> del inicio del mundial</li>
           <li>Las apuestas bonus se pueden modificar hasta antes de la fase eliminatoria</li>
           <li>En eliminatorias se puede apostar en los nuevos partidos generados</li>

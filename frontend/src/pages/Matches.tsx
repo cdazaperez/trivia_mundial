@@ -202,7 +202,7 @@ export default function Matches() {
           fontSize: "0.9rem",
           color: "#166534",
         }}>
-          Ingresa tus marcadores para cada partido de {phaseLabel}. Se bloquean 1 hora antes de cada partido.
+          Ingresa tus marcadores para cada partido de {phaseLabel}. Se bloquean 10 minutos antes de cada partido.
         </div>
       )}
 
@@ -218,7 +218,7 @@ export default function Matches() {
           const s = scores[match.id] || { home: "", away: "", homePen: "", awayPen: "" };
           const matchTime = new Date(match.match_date).getTime();
           const now = Date.now();
-          const isLocked = !match.is_finished && now >= matchTime - 60 * 60 * 1000;
+          const isLocked = !match.is_finished && now >= matchTime - 10 * 60 * 1000;
           const hasPenalties = match.home_penalties != null && match.away_penalties != null;
 
           return (

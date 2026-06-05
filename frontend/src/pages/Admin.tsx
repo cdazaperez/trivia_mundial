@@ -54,6 +54,7 @@ export default function Admin() {
 
   // Password reset
   const [users, setUsers] = useState<User[]>([]);
+  const [userSort, setUserSort] = useState<"name" | "paid" | "status">("name");
   const [selectedUser, setSelectedUser] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [pwdMsg, setPwdMsg] = useState("");
@@ -124,7 +125,8 @@ export default function Admin() {
 
   const filteredMatches = matches
     .filter((m) => (filter === "pending" ? !m.is_finished : m.is_finished))
-    .filter((m) => (phaseFilter === "all" ? true : m.phase === phaseFilter));
+    .filter((m) => (phaseFilter === "all" ? true : m.phase === phaseFilter))
+    .sort((a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime());
 
   const saveResult = async (matchId: number) => {
     const s = scores[matchId];
@@ -431,16 +433,35 @@ export default function Admin() {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
-              <th style={{ padding: "0.5rem" }}>Usuario</th>
+              <th
+                style={{ padding: "0.5rem", cursor: "pointer" }}
+                onClick={() => setUserSort("name")}
+              >
+                Usuario {userSort === "name" ? "▼" : ""}
+              </th>
               <th style={{ padding: "0.5rem" }}>Nombre</th>
               <th style={{ padding: "0.5rem" }}>Email</th>
-              <th style={{ padding: "0.5rem" }}>Pago</th>
-              <th style={{ padding: "0.5rem" }}>Estado</th>
+              <th
+                style={{ padding: "0.5rem", cursor: "pointer" }}
+                onClick={() => setUserSort("paid")}
+              >
+                Pago {userSort === "paid" ? "▼" : ""}
+              </th>
+              <th
+                style={{ padding: "0.5rem", cursor: "pointer" }}
+                onClick={() => setUserSort("status")}
+              >
+                Estado {userSort === "status" ? "▼" : ""}
+              </th>
               <th style={{ padding: "0.5rem" }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
+            {[...users].sort((a, b) => {
+              if (userSort === "paid") return (a.has_paid === b.has_paid) ? 0 : a.has_paid ? 1 : -1;
+              if (userSort === "status") return (a.is_active === b.is_active) ? 0 : a.is_active ? 1 : -1;
+              return a.username.localeCompare(b.username);
+            }).map((u) => (
               <tr key={u.id} style={{
                 borderBottom: "1px solid #e5e7eb",
                 opacity: u.is_active ? 1 : 0.5,
