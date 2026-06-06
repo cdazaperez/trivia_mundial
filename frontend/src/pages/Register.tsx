@@ -81,8 +81,8 @@ export default function Register() {
         <p className="auth-link">
           ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
         </p>
-        <RulesCompact />
       </div>
+      <RulesCompact />
     </div>
   );
 }

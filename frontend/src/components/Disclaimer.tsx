@@ -1,16 +1,19 @@
 export function RulesCompact() {
   return (
     <div style={{
-      marginTop: "1.5rem",
-      padding: "1rem",
-      background: "#f9fafb",
-      border: "1px solid #e5e7eb",
+      marginTop: "1rem",
+      padding: "1rem 1.25rem",
+      background: "rgba(255,255,255,0.12)",
+      backdropFilter: "blur(8px)",
+      border: "1px solid rgba(255,255,255,0.2)",
       borderRadius: "8px",
-      fontSize: "0.78rem",
-      color: "#6b7280",
+      fontSize: "0.75rem",
+      color: "rgba(255,255,255,0.85)",
       lineHeight: "1.5",
+      width: "100%",
+      maxWidth: "440px",
     }}>
-      <h4 style={{ color: "#374151", marginBottom: "0.5rem", fontSize: "0.85rem" }}>
+      <h4 style={{ color: "white", marginBottom: "0.5rem", fontSize: "0.85rem" }}>
         Reglas
       </h4>
       <ul style={{ paddingLeft: "1.1rem", margin: 0 }}>
