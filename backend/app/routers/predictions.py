@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.config import WORLD_CUP_START_DATE, PREDICTION_LOCK_HOURS_BEFORE
+from app.core.config import WORLD_CUP_START_DATE, PREDICTION_LOCK_MINUTES_BEFORE
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
@@ -27,13 +27,13 @@ def check_admin_cannot_predict(user: User):
 
 
 def check_group_predictions_locked():
-    """Check if group predictions are locked (24h before World Cup starts)."""
+    """Check if group predictions are locked (10 min before World Cup starts)."""
     lock_date = datetime.strptime(WORLD_CUP_START_DATE, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    lock_deadline = lock_date - timedelta(hours=PREDICTION_LOCK_HOURS_BEFORE)
+    lock_deadline = lock_date - timedelta(minutes=PREDICTION_LOCK_MINUTES_BEFORE)
     if datetime.now(timezone.utc) >= lock_deadline:
         raise HTTPException(
             status_code=403,
-            detail="Los pronósticos de grupos están bloqueados. No se pueden modificar 24 horas antes del inicio del mundial.",
+            detail="Los pronósticos de grupos están bloqueados. No se pueden modificar 10 minutos antes del inicio del mundial.",
         )
 
 

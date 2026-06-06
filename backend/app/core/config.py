@@ -11,8 +11,8 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./trivia_mundial.db")
 
 # World Cup 2026 starts June 11, 2026
 WORLD_CUP_START_DATE = "2026-06-11"
-# Predictions lock 24 hours before the tournament starts
-PREDICTION_LOCK_HOURS_BEFORE = 24
+# Predictions lock 10 minutes before the tournament starts
+PREDICTION_LOCK_MINUTES_BEFORE = 10
 
 # Scoring
 POINTS_EXACT_SCORE = 3
