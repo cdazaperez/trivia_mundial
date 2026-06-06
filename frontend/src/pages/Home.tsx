@@ -55,8 +55,8 @@ export default function Home() {
             <tr><td>Marcador exacto</td><td className="pts">+3 pts</td></tr>
             <tr><td>Resultado correcto (ganador/empate)</td><td className="pts">+1 pt</td></tr>
             <tr><td>Acertar ganador de penales (eliminatoria)</td><td className="pts">+1 pt</td></tr>
-            <tr><td>Acertar clasificado de grupo</td><td className="pts">+2 pts</td></tr>
-            <tr><td>Acertar 1ro del grupo</td><td className="pts">+3 pts</td></tr>
+            <tr><td>Acertar clasificado de grupo (posición incorrecta)</td><td className="pts">+2 pts</td></tr>
+            <tr><td>Acertar posición exacta en grupo (1ro o 2do)</td><td className="pts">+3 pts</td></tr>
             <tr><td>Acertar campeón</td><td className="pts">+10 pts</td></tr>
             <tr><td>Acertar subcampeón</td><td className="pts">+5 pts</td></tr>
             <tr><td>Acertar goleador</td><td className="pts">+5 pts</td></tr>
