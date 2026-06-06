@@ -721,6 +721,15 @@ body {
     justify-content: center;
   }
 
+  .navbar-links a {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .main-content {
+    padding: 1rem 0.75rem;
+  }
+
   .match-teams {
     flex-direction: column;
     gap: 0.5rem;
@@ -730,18 +739,88 @@ body {
     justify-content: center;
   }
 
+  .match-card {
+    padding: 0.75rem 1rem;
+  }
+
   .hero h1 { font-size: 1.8rem; }
 
   .home-grid { grid-template-columns: 1fr; }
   .groups-grid { grid-template-columns: 1fr; }
   .bonus-grid { grid-template-columns: 1fr; }
 
+  .auth-container {
+    padding: 1rem;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+    margin: 1rem 0;
+    max-width: 100%;
+  }
+
+  .auth-card h1 {
+    font-size: 1.25rem;
+  }
+
   .leaderboard-table {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .leaderboard-table th,
   .leaderboard-table td {
-    padding: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  .admin-section {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  .admin-section table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-form-row {
+    flex-direction: column;
+  }
+
+  .admin-form-row .form-group {
+    min-width: 100%;
+  }
+
+  .scoring-info, .rules-info {
+    padding: 1rem;
+  }
+
+  .phase-tabs {
+    gap: 0.3rem;
+  }
+
+  .tab {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .knockout-buttons {
+    flex-direction: column;
+  }
+
+  .knockout-buttons .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .disclaimer-section {
+    padding: 1rem !important;
+    font-size: 0.75rem !important;
   }
 }
