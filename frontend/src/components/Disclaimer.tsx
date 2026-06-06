@@ -11,7 +11,7 @@ export function RulesCompact() {
       color: "rgba(255,255,255,0.85)",
       lineHeight: "1.5",
       width: "100%",
-      maxWidth: "440px",
+      maxWidth: "520px",
     }}>
       <h4 style={{ color: "white", marginBottom: "0.5rem", fontSize: "0.85rem" }}>
         Reglas
