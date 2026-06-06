@@ -1,6 +1,7 @@
 import { useState, FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { register } from "../services/api";
+import Disclaimer from "../components/Disclaimer";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -80,6 +81,7 @@ export default function Register() {
         <p className="auth-link">
           ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
         </p>
+        <Disclaimer />
       </div>
     </div>
   );
