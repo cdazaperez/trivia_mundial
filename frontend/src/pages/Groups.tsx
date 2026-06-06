@@ -68,7 +68,10 @@ export default function Groups() {
   return (
     <div className="page">
       <h2>Pronóstico de Clasificados por Grupo</h2>
-      <p className="hint">Selecciona quién quedará 1ro y 2do en cada grupo</p>
+      <p className="hint">
+        Selecciona quién quedará 1ro y 2do en cada grupo.
+        Se bloquean <strong>10 minutos antes</strong> del inicio del mundial (11 de junio 2026).
+      </p>
 
       {msg && <div className="success-msg">{msg}</div>}
 

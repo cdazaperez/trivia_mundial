@@ -18,8 +18,8 @@ export function RulesCompact() {
       </h4>
       <ul style={{ paddingLeft: "1.1rem", margin: 0 }}>
         <li style={{ marginBottom: "0.3rem" }}>Los pronósticos de marcadores se bloquean <strong>10 minutos antes</strong> de cada partido</li>
-        <li style={{ marginBottom: "0.3rem" }}>Los pronósticos de grupos se bloquean <strong>10 minutos antes</strong> del inicio del mundial</li>
-        <li style={{ marginBottom: "0.3rem" }}>Las apuestas bonus se pueden modificar hasta antes de la fase eliminatoria</li>
+        <li style={{ marginBottom: "0.3rem" }}>Los pronósticos de 1ro y 2do de cada grupo se bloquean <strong>10 minutos antes</strong> del inicio del mundial (11 de junio 2026)</li>
+        <li style={{ marginBottom: "0.3rem" }}>Las apuestas bonus (campeón, subcampeón, goleador, MVP) se bloquean <strong>1 hora antes</strong> del primer partido eliminatorio</li>
         <li style={{ marginBottom: "0.3rem" }}>En eliminatorias se puede apostar en los nuevos partidos generados</li>
         <li style={{ marginBottom: "0.3rem" }}>En eliminatorias, si pronosticas empate debes incluir <strong>resultado de penales</strong></li>
         <li style={{ marginBottom: "0.3rem" }}>Los puntos se <strong>acumulan</strong> durante todo el mundial</li>
