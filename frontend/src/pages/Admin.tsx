@@ -13,8 +13,10 @@ import {
   getKnockoutStatus,
   generateKnockoutRound,
   autoGenerateNext,
+  setBonusResult,
+  getTeams,
 } from "../services/api";
-import { Match, User } from "../types";
+import { Match, User, Team } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 
 const PHASE_LABELS: Record<string, string> = {
@@ -81,10 +83,21 @@ export default function Admin() {
   const [showReseedConfirm, setShowReseedConfirm] = useState(false);
   const [reseedMsg, setReseedMsg] = useState("");
 
+  // Bonus results
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [bonusForm, setBonusForm] = useState<Record<string, { team_id: number; player_name: string }>>({
+    champion: { team_id: 0, player_name: "" },
+    runner_up: { team_id: 0, player_name: "" },
+    top_scorer: { team_id: 0, player_name: "" },
+    mvp: { team_id: 0, player_name: "" },
+  });
+  const [bonusMsg, setBonusMsg] = useState("");
+
   useEffect(() => {
     loadMatches();
     loadUsers();
     loadKnockoutStatus();
+    loadTeams();
   }, []);
 
   const loadMatches = async () => {
@@ -102,6 +115,41 @@ export default function Admin() {
       setUsers(res.data);
     } catch {
       // handle
+    }
+  };
+
+  const loadTeams = async () => {
+    try {
+      const res = await getTeams();
+      setTeams(res.data);
+    } catch {
+      // handle
+    }
+  };
+
+  const handleSaveBonusResult = async (type: string) => {
+    setBonusMsg("");
+    const form = bonusForm[type];
+    const isTeamType = type === "champion" || type === "runner_up";
+
+    if (isTeamType && !form.team_id) {
+      setBonusMsg("Selecciona un equipo");
+      return;
+    }
+    if (!isTeamType && !form.player_name.trim()) {
+      setBonusMsg("Ingresa el nombre del jugador");
+      return;
+    }
+
+    try {
+      const payload: any = { prediction_type: type };
+      if (isTeamType) payload.team_id = form.team_id;
+      else payload.player_name = form.player_name.trim();
+
+      const res = await setBonusResult(payload);
+      setBonusMsg(res.data.detail);
+    } catch (err: any) {
+      setBonusMsg(err.response?.data?.detail || "Error al guardar resultado bonus");
     }
   };
 
@@ -371,6 +419,72 @@ export default function Admin() {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* === BONUS RESULTS === */}
+      <div className="admin-section">
+        <h3>Resultados Bonus</h3>
+        <p className="hint">
+          Define los resultados reales de las apuestas bonus. Al guardar, se calculan automáticamente los puntos para los participantes que acertaron.
+        </p>
+        {bonusMsg && <div className="success-msg">{bonusMsg}</div>}
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
+          {[
+            { key: "champion", label: "Campeón", type: "team", pts: 10 },
+            { key: "runner_up", label: "Subcampeón", type: "team", pts: 5 },
+            { key: "top_scorer", label: "Goleador", type: "player", pts: 5 },
+            { key: "mvp", label: "MVP", type: "player", pts: 5 },
+          ].map((bonus) => (
+            <div key={bonus.key} style={{
+              padding: "1rem",
+              background: "#f9fafb",
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+            }}>
+              <div style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
+                {bonus.label}{" "}
+                <span style={{ fontSize: "0.75rem", color: "#6b7280", fontWeight: 400 }}>
+                  (+{bonus.pts} pts)
+                </span>
+              </div>
+              {bonus.type === "team" ? (
+                <select
+                  value={bonusForm[bonus.key]?.team_id || 0}
+                  onChange={(e) => setBonusForm({
+                    ...bonusForm,
+                    [bonus.key]: { ...bonusForm[bonus.key], team_id: Number(e.target.value) },
+                  })}
+                  style={{ width: "100%", padding: "0.4rem", marginBottom: "0.5rem" }}
+                >
+                  <option value={0}>Seleccionar equipo...</option>
+                  {teams.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.flag_emoji} {t.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={bonusForm[bonus.key]?.player_name || ""}
+                  onChange={(e) => setBonusForm({
+                    ...bonusForm,
+                    [bonus.key]: { ...bonusForm[bonus.key], player_name: e.target.value },
+                  })}
+                  placeholder="Nombre del jugador"
+                  style={{ width: "100%", padding: "0.4rem", marginBottom: "0.5rem", boxSizing: "border-box" }}
+                />
+              )}
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => handleSaveBonusResult(bonus.key)}
+              >
+                Guardar resultado
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
