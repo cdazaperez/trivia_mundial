@@ -2,7 +2,7 @@ import { useState, FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { login } from "../services/api";
-import Disclaimer from "../components/Disclaimer";
+import { RulesCompact } from "../components/Disclaimer";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -61,7 +61,7 @@ export default function Login() {
         <p className="auth-link">
           ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
         </p>
-        <Disclaimer />
+        <RulesCompact />
       </div>
     </div>
   );
