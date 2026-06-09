@@ -99,3 +99,19 @@ class BonusPrediction(Base):
 
     user = relationship("User", back_populates="bonus_predictions")
     team = relationship("Team")
+
+
+class PredictionAuditLog(Base):
+    __tablename__ = "prediction_audit_log"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    action = Column(String(20), nullable=False)  # created, updated
+    prediction_type = Column(String(20), nullable=False)  # match, group, bonus
+    prediction_id = Column(Integer, nullable=False)
+    old_values = Column(String(500), nullable=True)
+    new_values = Column(String(500), nullable=False)
+    ip_address = Column(String(45), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User")

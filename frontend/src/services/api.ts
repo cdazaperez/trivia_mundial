@@ -131,4 +131,8 @@ export const generateKnockoutRound = (phase: string) =>
 export const autoGenerateNext = () => api.post("/matches/auto-generate-next");
 export const getGroupStandings = () => api.get("/matches/standings/");
 
+// Audit
+export const getAuditLog = (userId?: number) =>
+  api.get("/predictions/audit-log", { params: userId ? { user_id: userId } : {} });
+
 export default api;

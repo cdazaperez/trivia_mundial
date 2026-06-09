@@ -29,6 +29,23 @@ with engine.connect() as conn:
         conn.execute(text("ALTER TABLE match_predictions ADD COLUMN home_penalties INTEGER"))
     if "away_penalties" not in pred_cols:
         conn.execute(text("ALTER TABLE match_predictions ADD COLUMN away_penalties INTEGER"))
+
+    existing_tables = inspect(engine).get_table_names()
+    if "prediction_audit_log" not in existing_tables:
+        conn.execute(text("""
+            CREATE TABLE prediction_audit_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                action VARCHAR(20) NOT NULL,
+                prediction_type VARCHAR(20) NOT NULL,
+                prediction_id INTEGER NOT NULL,
+                old_values VARCHAR(500),
+                new_values VARCHAR(500) NOT NULL,
+                ip_address VARCHAR(45),
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+
     conn.commit()
 
 app = FastAPI(

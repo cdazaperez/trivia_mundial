@@ -15,6 +15,7 @@ import {
   autoGenerateNext,
   setBonusResult,
   getTeams,
+  getAuditLog,
 } from "../services/api";
 import { Match, User, Team } from "../types";
 import { useAuth } from "../contexts/AuthContext";
@@ -93,6 +94,11 @@ export default function Admin() {
   });
   const [bonusMsg, setBonusMsg] = useState("");
 
+  // Audit log
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [auditFilter, setAuditFilter] = useState("");
+  const [showAudit, setShowAudit] = useState(false);
+
   useEffect(() => {
     loadMatches();
     loadUsers();
@@ -122,6 +128,15 @@ export default function Admin() {
     try {
       const res = await getTeams();
       setTeams(res.data);
+    } catch {
+      // handle
+    }
+  };
+
+  const loadAuditLog = async (userId?: number) => {
+    try {
+      const res = await getAuditLog(userId);
+      setAuditLogs(res.data);
     } catch {
       // handle
     }
@@ -732,6 +747,108 @@ export default function Admin() {
         >
           {updatingTeams ? "Actualizando..." : "Actualizar Equipos"}
         </button>
+      </div>
+
+      {/* === AUDIT LOG === */}
+      <div className="admin-section">
+        <h3>Log de Auditoría de Pronósticos</h3>
+        <p className="hint">
+          Registro de todas las creaciones y modificaciones de pronósticos con valores anteriores y nuevos.
+        </p>
+        {!showAudit ? (
+          <button className="btn btn-primary" onClick={() => { setShowAudit(true); loadAuditLog(); }}>
+            Ver Log de Auditoría
+          </button>
+        ) : (
+          <>
+            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+              <select
+                value={auditFilter}
+                onChange={(e) => {
+                  setAuditFilter(e.target.value);
+                  loadAuditLog(e.target.value ? Number(e.target.value) : undefined);
+                }}
+                style={{ padding: "0.4rem", borderRadius: "6px", border: "2px solid #e5e7eb" }}
+              >
+                <option value="">Todos los usuarios</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.full_name} (@{u.username})
+                  </option>
+                ))}
+              </select>
+              <button className="btn btn-sm" onClick={() => loadAuditLog(auditFilter ? Number(auditFilter) : undefined)}
+                style={{ background: "#3b82f6", color: "white" }}>
+                Actualizar
+              </button>
+              <button className="btn btn-sm" onClick={() => setShowAudit(false)}
+                style={{ background: "#6b7280", color: "white" }}>
+                Ocultar
+              </button>
+              <span style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                {auditLogs.length} registro(s)
+              </span>
+            </div>
+            <div style={{ maxHeight: "400px", overflowY: "auto", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" }}>
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #e5e7eb", background: "#f9fafb", position: "sticky", top: 0 }}>
+                    <th style={{ padding: "0.5rem", textAlign: "left" }}>Fecha</th>
+                    <th style={{ padding: "0.5rem", textAlign: "left" }}>Usuario</th>
+                    <th style={{ padding: "0.5rem", textAlign: "left" }}>Acción</th>
+                    <th style={{ padding: "0.5rem", textAlign: "left" }}>Tipo</th>
+                    <th style={{ padding: "0.5rem", textAlign: "left" }}>Anterior</th>
+                    <th style={{ padding: "0.5rem", textAlign: "left" }}>Nuevo</th>
+                    <th style={{ padding: "0.5rem", textAlign: "left" }}>IP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {auditLogs.map((log) => (
+                    <tr key={log.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <td style={{ padding: "0.4rem 0.5rem", whiteSpace: "nowrap" }}>
+                        {log.created_at ? new Date(log.created_at).toLocaleString("es-CO", {
+                          day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit"
+                        }) : ""}
+                      </td>
+                      <td style={{ padding: "0.4rem 0.5rem" }}>@{log.username}</td>
+                      <td style={{ padding: "0.4rem 0.5rem" }}>
+                        <span style={{
+                          padding: "1px 6px",
+                          borderRadius: "10px",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          background: log.action === "created" ? "#dcfce7" : "#fef9c3",
+                          color: log.action === "created" ? "#166534" : "#854d0e",
+                        }}>
+                          {log.action === "created" ? "Creado" : "Modificado"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "0.4rem 0.5rem" }}>
+                        {log.prediction_type === "match" ? "Partido" : log.prediction_type === "group" ? "Grupo" : "Bonus"}
+                      </td>
+                      <td style={{ padding: "0.4rem 0.5rem", color: "#991b1b", fontFamily: "monospace", fontSize: "0.72rem" }}>
+                        {log.old_values || "—"}
+                      </td>
+                      <td style={{ padding: "0.4rem 0.5rem", color: "#166534", fontFamily: "monospace", fontSize: "0.72rem" }}>
+                        {log.new_values}
+                      </td>
+                      <td style={{ padding: "0.4rem 0.5rem", color: "#6b7280", fontSize: "0.72rem" }}>
+                        {log.ip_address || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                  {auditLogs.length === 0 && (
+                    <tr>
+                      <td colSpan={7} style={{ padding: "1.5rem", textAlign: "center", color: "#9ca3af" }}>
+                        No hay registros de auditoría
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       {/* === RESET / RESEED === */}
