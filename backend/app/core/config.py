@@ -9,8 +9,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./trivia_mundial.db")
 
-# World Cup 2026 starts June 11, 2026
-WORLD_CUP_START_DATE = "2026-06-11"
+# World Cup 2026 first match: June 11, 2026 at 19:00 UTC (2:00 PM Colombia)
+WORLD_CUP_START_DATETIME = "2026-06-11T19:00:00"
 # Predictions lock 10 minutes before the tournament starts
 PREDICTION_LOCK_MINUTES_BEFORE = 10
 
