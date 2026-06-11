@@ -189,7 +189,11 @@ export default function Admin() {
   const filteredMatches = matches
     .filter((m) => (filter === "pending" ? !m.is_finished : m.is_finished))
     .filter((m) => (phaseFilter === "all" ? true : m.phase === phaseFilter))
-    .sort((a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime());
+    .sort((a, b) => {
+      const ta = a.match_date.endsWith("Z") || a.match_date.includes("+") ? a.match_date : a.match_date + "Z";
+      const tb = b.match_date.endsWith("Z") || b.match_date.includes("+") ? b.match_date : b.match_date + "Z";
+      return new Date(ta).getTime() - new Date(tb).getTime();
+    });
 
   const saveResult = async (matchId: number) => {
     const s = scores[matchId];
@@ -806,8 +810,9 @@ export default function Admin() {
                   {auditLogs.map((log) => (
                     <tr key={log.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
                       <td style={{ padding: "0.4rem 0.5rem", whiteSpace: "nowrap" }}>
-                        {log.created_at ? new Date(log.created_at).toLocaleString("es-CO", {
-                          day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit"
+                        {log.created_at ? new Date(log.created_at.endsWith("Z") || log.created_at.includes("+") ? log.created_at : log.created_at + "Z").toLocaleString("es-CO", {
+                          day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit",
+                          timeZone: "America/Bogota",
                         }) : ""}
                       </td>
                       <td style={{ padding: "0.4rem 0.5rem" }}>@{log.username}</td>

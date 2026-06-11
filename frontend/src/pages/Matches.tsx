@@ -130,12 +130,14 @@ export default function Matches() {
   };
 
   const formatDate = (d: string) => {
-    return new Date(d).toLocaleDateString("es", {
+    const iso = d.endsWith("Z") || d.includes("+") ? d : d + "Z";
+    return new Date(iso).toLocaleDateString("es-CO", {
       weekday: "short",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "America/Bogota",
     });
   };
 
@@ -216,7 +218,8 @@ export default function Matches() {
         {matches.map((match) => {
           const pred = predictions[match.id];
           const s = scores[match.id] || { home: "", away: "", homePen: "", awayPen: "" };
-          const matchTime = new Date(match.match_date).getTime();
+          const isoDate = match.match_date.endsWith("Z") || match.match_date.includes("+") ? match.match_date : match.match_date + "Z";
+          const matchTime = new Date(isoDate).getTime();
           const now = Date.now();
           const isLocked = !match.is_finished && now >= matchTime - 10 * 60 * 1000;
           const hasPenalties = match.home_penalties != null && match.away_penalties != null;

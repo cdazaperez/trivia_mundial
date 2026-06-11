@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel, field_validator
+from datetime import datetime, timezone
 
 
 class TeamResponse(BaseModel):
@@ -27,6 +27,13 @@ class MatchResponse(BaseModel):
     venue: str | None
     is_finished: bool
     matchday: int | None
+
+    @field_validator("match_date", mode="before")
+    @classmethod
+    def ensure_utc(cls, v: datetime) -> datetime:
+        if isinstance(v, datetime) and v.tzinfo is None:
+            return v.replace(tzinfo=timezone.utc)
+        return v
 
     model_config = {"from_attributes": True}
 

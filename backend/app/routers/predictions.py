@@ -378,7 +378,7 @@ def get_audit_log(
             "old_values": log.old_values,
             "new_values": log.new_values,
             "ip_address": log.ip_address,
-            "created_at": log.created_at.isoformat() if log.created_at else None,
+            "created_at": log.created_at.replace(tzinfo=timezone.utc).isoformat() if log.created_at else None,
         }
         for log in logs
     ]
