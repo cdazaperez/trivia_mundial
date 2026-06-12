@@ -106,7 +106,7 @@ GROUP_MATCHES_DATA = [
     {"n": 18, "g": "C", "md": 3, "h": "MAR", "a": "HAI", "dt": "2026-06-24T22:00", "v": "Mercedes-Benz Stadium, Atlanta"},
     # Group D: USA, PAR, AUS, TUR
     {"n": 19, "g": "D", "md": 1, "h": "USA", "a": "PAR", "dt": "2026-06-13T01:00", "v": "SoFi Stadium, Inglewood"},
-    {"n": 20, "g": "D", "md": 1, "h": "AUS", "a": "TUR", "dt": "2026-06-13T04:00", "v": "BC Place, Vancouver"},
+    {"n": 20, "g": "D", "md": 1, "h": "AUS", "a": "TUR", "dt": "2026-06-14T04:00", "v": "BC Place, Vancouver"},
     {"n": 21, "g": "D", "md": 2, "h": "USA", "a": "AUS", "dt": "2026-06-19T19:00", "v": "Lumen Field, Seattle"},
     {"n": 22, "g": "D", "md": 2, "h": "TUR", "a": "PAR", "dt": "2026-06-20T03:00", "v": "Levi's Stadium, Santa Clara"},
     {"n": 23, "g": "D", "md": 3, "h": "TUR", "a": "USA", "dt": "2026-06-26T02:00", "v": "SoFi Stadium, Inglewood"},

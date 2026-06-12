@@ -77,8 +77,23 @@ def startup():
     db = SessionLocal()
     try:
         seed_all(db)
+        _fix_match_dates(db)
     finally:
         db.close()
+
+
+def _fix_match_dates(db):
+    """One-time fix: correct match #20 date (was 24h early)."""
+    from app.models.tournament import Match
+    from datetime import datetime, timezone
+    m20 = db.query(Match).filter(Match.match_number == 20).first()
+    if m20:
+        correct = datetime(2026, 6, 14, 4, 0, tzinfo=timezone.utc)
+        wrong = datetime(2026, 6, 13, 4, 0, tzinfo=timezone.utc)
+        current = m20.match_date.replace(tzinfo=timezone.utc) if m20.match_date.tzinfo is None else m20.match_date
+        if current == wrong:
+            m20.match_date = correct
+            db.commit()
 
 
 @app.get("/api/health")
