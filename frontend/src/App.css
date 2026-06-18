@@ -709,6 +709,105 @@ body {
 /* === MATCH NUMBER === */
 .match-number { font-weight: 700; color: var(--primary); }
 
+/* === TODAY PAGE === */
+.today-section {
+  margin-bottom: 1rem;
+}
+
+.today-section-title {
+  color: var(--primary);
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border);
+}
+
+/* === GROUP STANDINGS === */
+.standings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.standings-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.standings-group-title {
+  background: var(--primary);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.standings-table th {
+  background: #f3f4f6;
+  padding: 0.35rem 0.4rem;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+.standings-table th:nth-child(2) {
+  text-align: left;
+}
+
+.standings-table td {
+  padding: 0.4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+
+.standings-table tr.qualifier td {
+  background: #f0fdf4;
+}
+
+.standings-table tr.qualifier td:first-child {
+  border-left: 3px solid var(--success);
+}
+
+.standings-table .pos {
+  font-weight: 700;
+  color: var(--text-light);
+  width: 24px;
+}
+
+.standings-table .team-cell {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.standings-table .team-flag-sm {
+  font-size: 1rem;
+}
+
+.standings-table .team-code {
+  font-weight: 600;
+}
+
+.standings-table .pts-cell {
+  font-weight: 800;
+  color: var(--primary);
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   .navbar {
@@ -824,5 +923,23 @@ body {
   .disclaimer-section {
     padding: 1rem !important;
     font-size: 0.75rem !important;
+  }
+
+  .standings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .standings-table {
+    font-size: 0.75rem;
+  }
+
+  .standings-table th {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.25rem;
+  }
+
+  .standings-table td {
+    padding: 0.3rem 0.25rem;
+    font-size: 0.75rem;
   }
 }

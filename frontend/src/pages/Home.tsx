@@ -18,10 +18,16 @@ export default function Home() {
       </div>
 
       <div className="home-grid">
+        <Link to="/today" className="home-card">
+          <div className="card-icon">📅</div>
+          <h3>Partidos de Hoy</h3>
+          <p>Pronostica los partidos del día y consulta la tabla de grupos</p>
+        </Link>
+
         <Link to="/matches" className="home-card">
           <div className="card-icon">⚽</div>
-          <h3>Pronosticar Partidos</h3>
-          <p>Ingresa tus marcadores para cada partido de la fase de grupos</p>
+          <h3>Todos los Partidos</h3>
+          <p>Ingresa tus marcadores para cada partido por fase y grupo</p>
         </Link>
 
         <Link to="/groups" className="home-card">
