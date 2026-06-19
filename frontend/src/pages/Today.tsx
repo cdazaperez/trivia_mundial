@@ -58,7 +58,7 @@ export default function Today() {
       const allMatches: Match[] = matchRes.data;
       const now = new Date();
       const colombiaOffset = -5 * 60;
-      const colombiaDate = new Date(now.getTime() + (now.getTimezoneOffset() + colombiaOffset) * 60000);
+      const colombiaDate = new Date(now.getTime() + colombiaOffset * 60000);
       const todayStr = colombiaDate.toISOString().slice(0, 10);
 
       const tomorrow = new Date(colombiaDate);
