@@ -191,14 +191,20 @@ def get_all_predictions_for_match(
     db: Session = Depends(get_db),
     _current_user: User = Depends(get_current_user),
 ):
-    """Get all users' predictions for a finished match."""
+    """Get all users' predictions for a locked or finished match."""
     match = db.query(Match).filter(Match.id == match_id).first()
     if not match:
         raise HTTPException(status_code=404, detail="Partido no encontrado")
 
-    # Only show others' predictions after match is finished
-    if not match.is_finished:
-        raise HTTPException(status_code=403, detail="Los pronósticos de otros usuarios solo son visibles después del partido")
+    if match.match_date.tzinfo is None:
+        match_date = match.match_date.replace(tzinfo=timezone.utc)
+    else:
+        match_date = match.match_date
+    lock_time = match_date - timedelta(minutes=10)
+    is_locked = datetime.now(timezone.utc) >= lock_time
+
+    if not match.is_finished and not is_locked:
+        raise HTTPException(status_code=403, detail="Los pronósticos de otros usuarios solo son visibles cuando se cierra el plazo del partido")
 
     predictions = db.query(MatchPrediction).options(
         joinedload(MatchPrediction.user)
@@ -210,6 +216,8 @@ def get_all_predictions_for_match(
             "full_name": p.user.full_name,
             "home_score": p.home_score,
             "away_score": p.away_score,
+            "home_penalties": p.home_penalties,
+            "away_penalties": p.away_penalties,
             "points_earned": p.points_earned,
         }
         for p in predictions

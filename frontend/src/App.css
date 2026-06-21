@@ -709,6 +709,73 @@ body {
 /* === MATCH NUMBER === */
 .match-number { font-weight: 700; color: var(--primary); }
 
+/* === OTHER PREDICTIONS === */
+.other-preds-section {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+}
+
+.btn-other-preds {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-other-preds:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.other-preds-list {
+  margin-top: 0.5rem;
+}
+
+.other-preds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.other-preds-table th {
+  background: #f3f4f6;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+.other-preds-table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.other-preds-table .pred-score {
+  font-weight: 700;
+  text-align: center;
+}
+
+.other-preds-table .pen-score {
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--text-light);
+}
+
+.other-preds-table .pts-earned {
+  font-weight: 700;
+  color: var(--success);
+  text-align: center;
+}
+
 /* === TODAY PAGE === */
 .today-section {
   margin-bottom: 1rem;

@@ -5,6 +5,7 @@ import {
   createPrediction,
   getMyPredictions,
   getGroupStandings,
+  getAllPredictionsForMatch,
 } from "../services/api";
 import { Match, Prediction } from "../types";
 
@@ -39,6 +40,8 @@ export default function Today() {
   const [saving, setSaving] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
   const [groups, setGroups] = useState<GroupData[]>([]);
+  const [otherPreds, setOtherPreds] = useState<Record<number, any[]>>({});
+  const [expandedMatch, setExpandedMatch] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -141,6 +144,22 @@ export default function Today() {
       setMsg(err.response?.data?.detail || "Error al guardar");
     }
     setSaving(null);
+  };
+
+  const toggleOtherPredictions = async (matchId: number) => {
+    if (expandedMatch === matchId) {
+      setExpandedMatch(null);
+      return;
+    }
+    if (!otherPreds[matchId]) {
+      try {
+        const res = await getAllPredictionsForMatch(matchId);
+        setOtherPreds((prev) => ({ ...prev, [matchId]: res.data }));
+      } catch {
+        return;
+      }
+    }
+    setExpandedMatch(matchId);
   };
 
   const formatTime = (d: string) => {
@@ -246,6 +265,54 @@ export default function Today() {
             <span className="flag">{match.away_team?.flag_emoji}</span>
           </div>
         </div>
+
+        {(isLocked || match.is_finished) && (
+          <div className="other-preds-section">
+            <button
+              className="btn-other-preds"
+              onClick={() => toggleOtherPredictions(match.id)}
+            >
+              {expandedMatch === match.id ? "Ocultar pronósticos" : "Ver pronósticos de todos"}
+            </button>
+            {expandedMatch === match.id && otherPreds[match.id] && (
+              <div className="other-preds-list">
+                {otherPreds[match.id].length === 0 ? (
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af", fontStyle: "italic" }}>
+                    Nadie pronosticó este partido
+                  </p>
+                ) : (
+                  <table className="other-preds-table">
+                    <thead>
+                      <tr>
+                        <th>Participante</th>
+                        <th>Pronóstico</th>
+                        {match.is_finished && <th>Pts</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {otherPreds[match.id].map((op: any) => (
+                        <tr key={op.username}>
+                          <td>{op.full_name}</td>
+                          <td className="pred-score">
+                            {op.home_score} - {op.away_score}
+                            {op.home_penalties != null && op.away_penalties != null && (
+                              <span className="pen-score"> (Pen: {op.home_penalties}-{op.away_penalties})</span>
+                            )}
+                          </td>
+                          {match.is_finished && (
+                            <td className={op.points_earned > 0 ? "pts-earned" : ""}>
+                              {op.points_earned}
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };

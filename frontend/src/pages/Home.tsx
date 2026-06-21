@@ -81,7 +81,7 @@ export default function Home() {
           <li>En eliminatorias se puede apostar en los nuevos partidos generados</li>
           <li>En eliminatorias, si pronosticas empate debes incluir <strong>resultado de penales</strong></li>
           <li>Los puntos se <strong>acumulan</strong> durante todo el mundial</li>
-          <li>Los pronósticos de otros jugadores se ven después de que termine el partido</li>
+          <li>Los pronósticos de otros jugadores se ven cuando se <strong>cierra el plazo</strong> del partido (10 min antes)</li>
         </ul>
       </div>
 
