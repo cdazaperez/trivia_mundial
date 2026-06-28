@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.tournament import Match, Phase, Team
+from app.services.annex_c import FIFA_ANNEX_C
 from app.services.standings import (
     are_all_group_matches_finished,
     get_all_group_standings,
@@ -139,7 +140,7 @@ PHASE_LABELS = {
 
 
 def _assign_third_place_teams(qualifying_groups: list[str]) -> dict[int, str]:
-    """Assign 8 qualifying third-place teams to R32 match slots using backtracking.
+    """Assign 8 qualifying third-place teams to R32 match slots using FIFA Annex C.
 
     Args:
         qualifying_groups: sorted list of 8 group letters whose 3rd-place teams qualified.
@@ -147,29 +148,12 @@ def _assign_third_place_teams(qualifying_groups: list[str]) -> dict[int, str]:
     Returns:
         dict mapping match_number -> group letter.
     """
-    slots = sorted(THIRD_PLACE_SLOTS.keys())
-    remaining = list(qualifying_groups)
-    assignment: dict[int, str] = {}
-
-    def backtrack(idx: int) -> bool:
-        if idx == len(slots):
-            return True
-        match_num = slots[idx]
-        eligible = THIRD_PLACE_SLOTS[match_num]
-        for group in remaining[:]:
-            if group in eligible:
-                assignment[match_num] = group
-                remaining.remove(group)
-                if backtrack(idx + 1):
-                    return True
-                remaining.append(group)
-                remaining.sort()
-                del assignment[match_num]
-        return False
-
-    if not backtrack(0):
-        raise ValueError("No valid third-place assignment found")
-    return assignment
+    key = "".join(sorted(qualifying_groups))
+    if key not in FIFA_ANNEX_C:
+        raise ValueError(
+            f"Combinación de terceros {key} no encontrada en la tabla FIFA Anexo C"
+        )
+    return dict(FIFA_ANNEX_C[key])
 
 
 def _get_team_by_position(
