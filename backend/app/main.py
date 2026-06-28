@@ -78,6 +78,7 @@ def startup():
     try:
         seed_all(db)
         _fix_match_dates(db)
+        _fix_knockout_schedule(db)
     finally:
         db.close()
 
@@ -94,6 +95,54 @@ def _fix_match_dates(db):
         if current == wrong:
             m20.match_date = correct
             db.commit()
+
+
+def _fix_knockout_schedule(db):
+    """Update existing knockout matches with correct FIFA dates, venues, and bracket."""
+    from app.models.tournament import Match, Phase
+    from app.services.knockout import MATCH_SCHEDULE, R16_MATCHES
+
+    updated = False
+
+    # Fix dates and venues for all existing knockout matches
+    for match_num, (correct_date, correct_venue) in MATCH_SCHEDULE.items():
+        match = db.query(Match).filter(Match.match_number == match_num).first()
+        if not match:
+            continue
+        current_date = match.match_date
+        if current_date and current_date.tzinfo is None:
+            current_date = current_date.replace(tzinfo=correct_date.tzinfo)
+        if current_date != correct_date or match.venue != correct_venue:
+            match.match_date = correct_date
+            match.venue = correct_venue
+            updated = True
+
+    # Fix R16 bracket: matches 93 and 94 had swapped sources.
+    # If R16 matches exist but haven't been played, fix the team assignments.
+    r16_bracket_fix = {93: (83, 84), 94: (81, 82)}
+    for match_num, (src_a, src_b) in r16_bracket_fix.items():
+        r16_match = db.query(Match).filter(Match.match_number == match_num).first()
+        if not r16_match or r16_match.is_finished:
+            continue
+        src_a_match = db.query(Match).filter(Match.match_number == src_a).first()
+        src_b_match = db.query(Match).filter(Match.match_number == src_b).first()
+        if not src_a_match or not src_b_match:
+            continue
+        if not src_a_match.is_finished or not src_b_match.is_finished:
+            continue
+        from app.services.knockout import _get_match_winner
+        try:
+            correct_home = _get_match_winner(db, src_a)
+            correct_away = _get_match_winner(db, src_b)
+            if r16_match.home_team_id != correct_home or r16_match.away_team_id != correct_away:
+                r16_match.home_team_id = correct_home
+                r16_match.away_team_id = correct_away
+                updated = True
+        except ValueError:
+            pass
+
+    if updated:
+        db.commit()
 
 
 @app.get("/api/health")
