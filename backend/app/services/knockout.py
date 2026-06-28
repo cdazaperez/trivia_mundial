@@ -1,5 +1,5 @@
 """Knockout stage bracket generation for FIFA World Cup 2026."""
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
@@ -54,8 +54,8 @@ R16_MATCHES = [
     (90, 73, 75),
     (91, 76, 78),
     (92, 79, 80),
-    (93, 81, 82),
-    (94, 83, 84),
+    (93, 83, 84),
+    (94, 81, 82),
     (95, 86, 88),
     (96, 85, 87),
 ]
@@ -78,14 +78,53 @@ SF_MATCHES = [
 THIRD_PLACE_MATCH = (103, 101, 102)  # losers of semis
 FINAL_MATCH = (104, 101, 102)        # winners of semis
 
-# Knockout dates (approximate)
-KNOCKOUT_DATES = {
-    Phase.ROUND_OF_32: datetime(2026, 6, 28, 18, 0, 0, tzinfo=timezone.utc),
-    Phase.ROUND_OF_16: datetime(2026, 7, 4, 18, 0, 0, tzinfo=timezone.utc),
-    Phase.QUARTER_FINAL: datetime(2026, 7, 9, 18, 0, 0, tzinfo=timezone.utc),
-    Phase.SEMI_FINAL: datetime(2026, 7, 14, 20, 0, 0, tzinfo=timezone.utc),
-    Phase.THIRD_PLACE: datetime(2026, 7, 18, 20, 0, 0, tzinfo=timezone.utc),
-    Phase.FINAL: datetime(2026, 7, 19, 20, 0, 0, tzinfo=timezone.utc),
+# ============================================================
+# Official match schedule: date (UTC) and venue per match
+# ============================================================
+
+def _utc(y, mo, d, h, m=0):
+    return datetime(y, mo, d, h, m, tzinfo=timezone.utc)
+
+
+MATCH_SCHEDULE = {
+    # Round of 32 (June 28 – July 3)
+    73: (_utc(2026, 6, 28, 19, 0), "SoFi Stadium, Inglewood"),
+    76: (_utc(2026, 6, 29, 17, 0), "NRG Stadium, Houston"),
+    74: (_utc(2026, 6, 29, 20, 30), "Gillette Stadium, Foxborough"),
+    75: (_utc(2026, 6, 30, 1, 0), "Estadio BBVA, Monterrey"),
+    78: (_utc(2026, 6, 30, 17, 0), "AT&T Stadium, Arlington"),
+    77: (_utc(2026, 6, 30, 21, 0), "MetLife Stadium, East Rutherford"),
+    79: (_utc(2026, 7, 1, 1, 0), "Estadio Azteca, Ciudad de México"),
+    80: (_utc(2026, 7, 1, 16, 0), "Mercedes-Benz Stadium, Atlanta"),
+    82: (_utc(2026, 7, 1, 20, 0), "Lumen Field, Seattle"),
+    81: (_utc(2026, 7, 2, 0, 0), "Levi's Stadium, Santa Clara"),
+    84: (_utc(2026, 7, 2, 19, 0), "SoFi Stadium, Inglewood"),
+    83: (_utc(2026, 7, 2, 23, 0), "BMO Field, Toronto"),
+    85: (_utc(2026, 7, 3, 3, 0), "BC Place, Vancouver"),
+    88: (_utc(2026, 7, 3, 18, 0), "AT&T Stadium, Arlington"),
+    86: (_utc(2026, 7, 3, 22, 0), "Hard Rock Stadium, Miami Gardens"),
+    87: (_utc(2026, 7, 4, 1, 30), "Arrowhead Stadium, Kansas City"),
+    # Round of 16 (July 4 – 7)
+    90: (_utc(2026, 7, 4, 17, 0), "NRG Stadium, Houston"),
+    89: (_utc(2026, 7, 4, 21, 0), "Lincoln Financial Field, Philadelphia"),
+    91: (_utc(2026, 7, 5, 20, 0), "MetLife Stadium, East Rutherford"),
+    92: (_utc(2026, 7, 6, 0, 0), "Estadio Azteca, Ciudad de México"),
+    93: (_utc(2026, 7, 6, 19, 0), "AT&T Stadium, Arlington"),
+    94: (_utc(2026, 7, 6, 21, 0), "Lumen Field, Seattle"),
+    95: (_utc(2026, 7, 7, 16, 0), "Mercedes-Benz Stadium, Atlanta"),
+    96: (_utc(2026, 7, 7, 20, 0), "BC Place, Vancouver"),
+    # Quarterfinals (July 9 – 11)
+    97: (_utc(2026, 7, 9, 20, 0), "Gillette Stadium, Foxborough"),
+    98: (_utc(2026, 7, 10, 22, 0), "SoFi Stadium, Inglewood"),
+    99: (_utc(2026, 7, 11, 21, 0), "Hard Rock Stadium, Miami Gardens"),
+    100: (_utc(2026, 7, 12, 1, 0), "Arrowhead Stadium, Kansas City"),
+    # Semifinals (July 14 – 15)
+    101: (_utc(2026, 7, 14, 19, 0), "AT&T Stadium, Arlington"),
+    102: (_utc(2026, 7, 15, 19, 0), "Mercedes-Benz Stadium, Atlanta"),
+    # Third place (July 18)
+    103: (_utc(2026, 7, 18, 21, 0), "Hard Rock Stadium, Miami Gardens"),
+    # Final (July 19)
+    104: (_utc(2026, 7, 19, 19, 0), "MetLife Stadium, East Rutherford"),
 }
 
 # Phase labels in Spanish
@@ -96,15 +135,6 @@ PHASE_LABELS = {
     Phase.SEMI_FINAL: "Semifinales",
     Phase.THIRD_PLACE: "Tercer Puesto",
     Phase.FINAL: "Final",
-}
-
-VENUE_MAP = {
-    Phase.ROUND_OF_32: "Por definir",
-    Phase.ROUND_OF_16: "Por definir",
-    Phase.QUARTER_FINAL: "Por definir",
-    Phase.SEMI_FINAL: "Por definir",
-    Phase.THIRD_PLACE: "Hard Rock Stadium, Miami",
-    Phase.FINAL: "MetLife Stadium, New Jersey",
 }
 
 
@@ -263,20 +293,18 @@ def generate_round_of_32(db: Session) -> list[Match]:
         if entry["qualifies"]:
             third_place_teams[entry["group"]] = entry["team_id"]
 
-    base_date = KNOCKOUT_DATES[Phase.ROUND_OF_32]
     created = []
 
-    for i, (match_num, home_pos, away_pos) in enumerate(R32_MATCHES):
+    for match_num, home_pos, away_pos in R32_MATCHES:
         home_team_id = _get_team_by_position(standings, home_pos)
 
         if away_pos is not None:
             away_team_id = _get_team_by_position(standings, away_pos)
         else:
-            # Third-place slot
             assigned_group = third_place_assignment[match_num]
             away_team_id = third_place_teams[assigned_group]
 
-        match_date = base_date + timedelta(hours=i * 3)
+        match_date, venue = MATCH_SCHEDULE[match_num]
 
         match = Match(
             match_number=match_num,
@@ -284,7 +312,7 @@ def generate_round_of_32(db: Session) -> list[Match]:
             home_team_id=home_team_id,
             away_team_id=away_team_id,
             match_date=match_date,
-            venue=VENUE_MAP[Phase.ROUND_OF_32],
+            venue=venue,
         )
         db.add(match)
         created.append(match)
@@ -306,21 +334,22 @@ def _generate_from_previous(
     if existing > 0:
         raise ValueError(f"Los partidos de {PHASE_LABELS.get(phase, phase.value)} ya fueron generados")
 
-    base_date = KNOCKOUT_DATES[phase]
     created = []
     getter = _get_match_loser if use_losers else _get_match_winner
 
-    for i, (match_num, source_a, source_b) in enumerate(matchups):
+    for match_num, source_a, source_b in matchups:
         home_team_id = getter(db, source_a)
         away_team_id = getter(db, source_b)
+
+        match_date, venue = MATCH_SCHEDULE[match_num]
 
         match = Match(
             match_number=match_num,
             phase=phase,
             home_team_id=home_team_id,
             away_team_id=away_team_id,
-            match_date=base_date + timedelta(hours=i * 3),
-            venue=VENUE_MAP[phase],
+            match_date=match_date,
+            venue=venue,
         )
         db.add(match)
         created.append(match)
@@ -379,13 +408,14 @@ def generate_finals(db: Session) -> list[Match]:
     tp_num, tp_src_a, tp_src_b = THIRD_PLACE_MATCH
     existing_tp = db.query(Match).filter(Match.phase == Phase.THIRD_PLACE).count()
     if existing_tp == 0:
+        tp_date, tp_venue = MATCH_SCHEDULE[tp_num]
         tp_match = Match(
             match_number=tp_num,
             phase=Phase.THIRD_PLACE,
             home_team_id=_get_match_loser(db, tp_src_a),
             away_team_id=_get_match_loser(db, tp_src_b),
-            match_date=KNOCKOUT_DATES[Phase.THIRD_PLACE],
-            venue=VENUE_MAP[Phase.THIRD_PLACE],
+            match_date=tp_date,
+            venue=tp_venue,
         )
         db.add(tp_match)
         created.append(tp_match)
@@ -394,13 +424,14 @@ def generate_finals(db: Session) -> list[Match]:
     f_num, f_src_a, f_src_b = FINAL_MATCH
     existing_f = db.query(Match).filter(Match.phase == Phase.FINAL).count()
     if existing_f == 0:
+        f_date, f_venue = MATCH_SCHEDULE[f_num]
         final_match = Match(
             match_number=f_num,
             phase=Phase.FINAL,
             home_team_id=_get_match_winner(db, f_src_a),
             away_team_id=_get_match_winner(db, f_src_b),
-            match_date=KNOCKOUT_DATES[Phase.FINAL],
-            venue=VENUE_MAP[Phase.FINAL],
+            match_date=f_date,
+            venue=f_venue,
         )
         db.add(final_match)
         created.append(final_match)
