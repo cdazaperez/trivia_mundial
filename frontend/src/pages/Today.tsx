@@ -9,6 +9,16 @@ import {
 } from "../services/api";
 import { Match, Prediction } from "../types";
 
+const PHASE_LABELS: Record<string, string> = {
+  group: "Fase de Grupos",
+  round_of_32: "32avos de Final",
+  round_of_16: "Octavos de Final",
+  quarter_final: "Cuartos de Final",
+  semi_final: "Semifinales",
+  third_place: "Tercer Puesto",
+  final: "Final",
+};
+
 interface GroupStanding {
   team_id: number;
   team_name: string;
@@ -130,8 +140,14 @@ export default function Today() {
         setMsg("En eliminatoria con empate, debes ingresar los penales.");
         return;
       }
-      payload.home_penalties = parseInt(s.homePen);
-      payload.away_penalties = parseInt(s.awayPen);
+      const hp = parseInt(s.homePen);
+      const ap = parseInt(s.awayPen);
+      if (hp === ap) {
+        setMsg("Los penales no pueden terminar empatados.");
+        return;
+      }
+      payload.home_penalties = hp;
+      payload.away_penalties = ap;
     }
 
     setSaving(matchId);
@@ -194,7 +210,11 @@ export default function Today() {
       >
         <div className="match-date">
           <span className="match-number">#{match.match_number} </span>
-          <span>Grupo {match.group_name} &middot; </span>
+          {match.phase === "group" ? (
+            <span>Grupo {match.group_name} &middot; </span>
+          ) : (
+            <span>{PHASE_LABELS[match.phase] || match.phase} &middot; </span>
+          )}
           {formatTime(match.match_date)}
           {match.venue && <span style={{ color: "#9ca3af" }}> &middot; {match.venue}</span>}
           {isLocked && !match.is_finished && (
@@ -222,6 +242,9 @@ export default function Today() {
               {pred ? (
                 <span className={`points ${pred.points_earned > 0 ? "earned" : ""}`}>
                   Tu pronóstico: {pred.home_score}-{pred.away_score}
+                  {pred.home_penalties != null && pred.away_penalties != null && (
+                    <> (Pen: {pred.home_penalties}-{pred.away_penalties})</>
+                  )}
                   {" "}({pred.points_earned} pts)
                 </span>
               ) : (
@@ -236,10 +259,14 @@ export default function Today() {
               {pred && (
                 <span className="points">
                   Tu pronóstico: {pred.home_score}-{pred.away_score}
+                  {pred.home_penalties != null && pred.away_penalties != null && (
+                    <> (Pen: {pred.home_penalties}-{pred.away_penalties})</>
+                  )}
                 </span>
               )}
             </div>
           ) : (
+            <>
             <div className="match-prediction-input">
               <input
                 type="number" min="0" max="20" value={s.home}
@@ -258,6 +285,52 @@ export default function Today() {
                 {pred ? "Actualizar" : "Guardar"}
               </button>
             </div>
+            {match.phase !== "group" && s.home !== "" && s.away !== "" && parseInt(s.home) === parseInt(s.away) && (
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                marginTop: "0.4rem",
+                padding: "0.4rem 0.6rem",
+                background: "#fefce8",
+                border: "1px solid #fde68a",
+                borderRadius: "6px",
+                fontSize: "0.8rem",
+              }}>
+                <span style={{ color: "#92400e" }}>Penales:</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="20"
+                  value={s.homePen}
+                  placeholder="L"
+                  style={{ width: "45px", textAlign: "center" }}
+                  onChange={(e) =>
+                    setScores({
+                      ...scores,
+                      [match.id]: { ...s, homePen: e.target.value },
+                    })
+                  }
+                />
+                <span style={{ color: "#92400e" }}>-</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="20"
+                  value={s.awayPen}
+                  placeholder="V"
+                  style={{ width: "45px", textAlign: "center" }}
+                  onChange={(e) =>
+                    setScores({
+                      ...scores,
+                      [match.id]: { ...s, awayPen: e.target.value },
+                    })
+                  }
+                />
+              </div>
+            )}
+            </>
           )}
 
           <div className="team away">

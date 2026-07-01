@@ -30,6 +30,12 @@ export default function Home() {
           <p>Ingresa tus marcadores para cada partido por fase y grupo</p>
         </Link>
 
+        <Link to="/bracket" className="home-card">
+          <div className="card-icon">🏟️</div>
+          <h3>Llaves del Mundial</h3>
+          <p>Cuadro eliminatorio con los resultados de cada fase</p>
+        </Link>
+
         <Link to="/groups" className="home-card">
           <div className="card-icon">🏆</div>
           <h3>Clasificados por Grupo</h3>

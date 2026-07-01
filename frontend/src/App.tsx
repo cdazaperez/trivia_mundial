@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Today from "./pages/Today";
+import Bracket from "./pages/Bracket";
 import Matches from "./pages/Matches";
 import Groups from "./pages/Groups";
 import Bonus from "./pages/Bonus";
@@ -40,6 +41,7 @@ function AppRoutes() {
           />
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/today" element={<PrivateRoute><Today /></PrivateRoute>} />
+          <Route path="/bracket" element={<PrivateRoute><Bracket /></PrivateRoute>} />
           <Route path="/matches" element={<PrivateRoute><Matches /></PrivateRoute>} />
           <Route path="/groups" element={<PrivateRoute><Groups /></PrivateRoute>} />
           <Route path="/bonus" element={<PrivateRoute><Bonus /></PrivateRoute>} />

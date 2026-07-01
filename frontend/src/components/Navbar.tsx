@@ -22,6 +22,7 @@ export default function Navbar() {
           <>
             <Link to="/today">Hoy</Link>
             <Link to="/matches">Partidos</Link>
+            <Link to="/bracket">Llaves</Link>
             <Link to="/predictions">Mis Pronósticos</Link>
             <Link to="/groups">Grupos</Link>
             <Link to="/bonus">Apuestas Bonus</Link>
