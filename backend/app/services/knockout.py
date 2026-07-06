@@ -111,7 +111,7 @@ MATCH_SCHEDULE = {
     91: (_utc(2026, 7, 5, 20, 0), "MetLife Stadium, East Rutherford"),
     92: (_utc(2026, 7, 6, 0, 0), "Estadio Azteca, Ciudad de México"),
     93: (_utc(2026, 7, 6, 19, 0), "AT&T Stadium, Arlington"),
-    94: (_utc(2026, 7, 6, 21, 0), "Lumen Field, Seattle"),
+    94: (_utc(2026, 7, 7, 0, 0), "Lumen Field, Seattle"),
     95: (_utc(2026, 7, 7, 16, 0), "Mercedes-Benz Stadium, Atlanta"),
     96: (_utc(2026, 7, 7, 20, 0), "BC Place, Vancouver"),
     # Quarterfinals (July 9 – 11)
