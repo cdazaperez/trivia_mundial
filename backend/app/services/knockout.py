@@ -116,7 +116,7 @@ MATCH_SCHEDULE = {
     96: (_utc(2026, 7, 7, 20, 0), "BC Place, Vancouver"),
     # Quarterfinals (July 9 – 11)
     97: (_utc(2026, 7, 9, 20, 0), "Gillette Stadium, Foxborough"),
-    98: (_utc(2026, 7, 10, 22, 0), "SoFi Stadium, Inglewood"),
+    98: (_utc(2026, 7, 10, 19, 0), "SoFi Stadium, Inglewood"),
     99: (_utc(2026, 7, 11, 21, 0), "Hard Rock Stadium, Miami Gardens"),
     100: (_utc(2026, 7, 12, 1, 0), "Arrowhead Stadium, Kansas City"),
     # Semifinals (July 14 – 15)
