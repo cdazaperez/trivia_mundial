@@ -1,3 +1,5 @@
+import unicodedata
+
 from sqlalchemy.orm import Session
 
 from app.core.config import (
@@ -112,6 +114,37 @@ def calculate_group_prediction_points(db: Session, group_name: str):
     return updated
 
 
+def _normalize_name(name: str) -> str:
+    """Normalize a player name for fuzzy comparison: strip, lowercase, remove accents/diacritics, normalize punctuation."""
+    name = name.strip().lower()
+    name = unicodedata.normalize("NFD", name)
+    name = "".join(c for c in name if unicodedata.category(c) != "Mn")
+    name = name.replace("-", " ").replace(".", " ").replace("'", "")
+    name = " ".join(name.split())
+    return name
+
+
+def _names_match(prediction_name: str, actual_name: str) -> bool:
+    """Check if a predicted player name matches the actual name using flexible matching."""
+    norm_pred = _normalize_name(prediction_name)
+    norm_actual = _normalize_name(actual_name)
+
+    if norm_pred == norm_actual:
+        return True
+
+    if norm_pred in norm_actual or norm_actual in norm_pred:
+        return True
+
+    pred_parts = set(norm_pred.split())
+    actual_parts = set(norm_actual.split())
+    if pred_parts and actual_parts and pred_parts.issubset(actual_parts):
+        return True
+    if pred_parts and actual_parts and actual_parts.issubset(pred_parts):
+        return True
+
+    return False
+
+
 def calculate_bonus_prediction_points(db: Session, prediction_type: str, team_id: int | None = None, player_name: str | None = None):
     """Calculate points for a specific bonus prediction type. Admin sets the actual result."""
     points_map = {
@@ -136,7 +169,7 @@ def calculate_bonus_prediction_points(db: Session, prediction_type: str, team_id
             if team_id and pred.team_id == team_id:
                 points = max_points
         else:
-            if player_name and pred.player_name and pred.player_name.strip().lower() == player_name.strip().lower():
+            if player_name and pred.player_name and _names_match(pred.player_name, player_name):
                 points = max_points
         pred.points_earned = points
         if points > 0:

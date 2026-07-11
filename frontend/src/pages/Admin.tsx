@@ -14,6 +14,7 @@ import {
   generateKnockoutRound,
   autoGenerateNext,
   setBonusResult,
+  getBonusPredictionsSummary,
   getTeams,
   getAuditLog,
 } from "../services/api";
@@ -93,6 +94,8 @@ export default function Admin() {
     mvp: { team_id: 0, player_name: "" },
   });
   const [bonusMsg, setBonusMsg] = useState("");
+  const [bonusSummary, setBonusSummary] = useState<Record<string, any[]>>({});
+  const [bonusSummaryVisible, setBonusSummaryVisible] = useState<Record<string, boolean>>({});
 
   // Audit log
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -165,6 +168,20 @@ export default function Admin() {
       setBonusMsg(res.data.detail);
     } catch (err: any) {
       setBonusMsg(err.response?.data?.detail || "Error al guardar resultado bonus");
+    }
+  };
+
+  const handleToggleBonusSummary = async (type: string) => {
+    if (bonusSummaryVisible[type]) {
+      setBonusSummaryVisible({ ...bonusSummaryVisible, [type]: false });
+      return;
+    }
+    try {
+      const res = await getBonusPredictionsSummary(type);
+      setBonusSummary({ ...bonusSummary, [type]: res.data });
+      setBonusSummaryVisible({ ...bonusSummaryVisible, [type]: true });
+    } catch {
+      setBonusMsg("Error al cargar respuestas");
     }
   };
 
@@ -502,6 +519,27 @@ export default function Admin() {
               >
                 Guardar resultado
               </button>
+              <button
+                className="btn btn-sm"
+                style={{ marginLeft: "0.5rem", fontSize: "0.75rem" }}
+                onClick={() => handleToggleBonusSummary(bonus.key)}
+              >
+                {bonusSummaryVisible[bonus.key] ? "Ocultar" : "Ver respuestas"}
+              </button>
+              {bonusSummaryVisible[bonus.key] && bonusSummary[bonus.key] && (
+                <div style={{ marginTop: "0.5rem", fontSize: "0.8rem", maxHeight: "150px", overflowY: "auto", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "4px", padding: "0.4rem" }}>
+                  {bonusSummary[bonus.key].length === 0 ? (
+                    <div style={{ color: "#9ca3af" }}>Sin respuestas</div>
+                  ) : (
+                    bonusSummary[bonus.key].map((p: any, i: number) => (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "2px 0", borderBottom: "1px solid #f3f4f6" }}>
+                        <span>{p.full_name || p.username}</span>
+                        <span style={{ fontWeight: 500 }}>{p.player_name || `Equipo #${p.team_id}`}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

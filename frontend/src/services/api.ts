@@ -123,6 +123,8 @@ export const setBonusResult = (data: {
   team_id?: number;
   player_name?: string;
 }) => api.post("/matches/bonus-result", data);
+export const getBonusPredictionsSummary = (prediction_type: string) =>
+  api.get(`/matches/bonus-predictions-summary?prediction_type=${prediction_type}`);
 
 // Standings & Knockout
 export const getKnockoutStatus = () => api.get("/matches/knockout-status");
