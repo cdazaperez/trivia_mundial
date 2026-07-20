@@ -547,9 +547,10 @@ export default function Admin() {
           ))}
         </div>
 
-        <div style={{ marginTop: "1rem" }}>
+        <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#eff6ff", border: "2px solid #3b82f6", borderRadius: "8px" }}>
           <button
-            className="btn btn-sm"
+            className="btn btn-primary"
+            style={{ fontSize: "1rem", padding: "0.6rem 1.5rem" }}
             onClick={async () => {
               if (bonusAuditVisible) {
                 setBonusAuditVisible(false);
@@ -566,6 +567,9 @@ export default function Admin() {
           >
             {bonusAuditVisible ? "Ocultar Auditoría" : "Auditar Bonus"}
           </button>
+          <span style={{ marginLeft: "0.75rem", fontSize: "0.85rem", color: "#1e40af" }}>
+            Verifica que nadie haya cambiado apuestas bonus fuera de tiempo
+          </span>
         </div>
 
         {bonusAuditVisible && bonusAuditData && (
