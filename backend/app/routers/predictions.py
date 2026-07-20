@@ -390,3 +390,88 @@ def get_audit_log(
         }
         for log in logs
     ]
+
+
+@router.get("/bonus-audit")
+def bonus_audit(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Audit bonus predictions: check if any were created/modified after the lock deadline."""
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Solo el administrador puede ver la auditoría")
+
+    first_knockout = (
+        db.query(Match)
+        .filter(Match.phase != Phase.GROUP)
+        .order_by(Match.match_date)
+        .first()
+    )
+
+    if not first_knockout:
+        return {"lock_time": None, "message": "No hay fase eliminatoria aún", "predictions": [], "violations": []}
+
+    lock_date = first_knockout.match_date
+    if lock_date.tzinfo is None:
+        lock_date = lock_date.replace(tzinfo=timezone.utc)
+    lock_time = lock_date - timedelta(hours=1)
+
+    from app.models.tournament import BonusPrediction
+    preds = db.query(BonusPrediction).all()
+    users_map = {u.id: u for u in db.query(User).all()}
+
+    predictions_data = []
+    for p in preds:
+        user = users_map.get(p.user_id)
+        created = p.created_at
+        if created and created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+        predictions_data.append({
+            "username": user.username if user else "?",
+            "full_name": user.full_name if user else "?",
+            "prediction_type": p.prediction_type,
+            "team_id": p.team_id,
+            "player_name": p.player_name,
+            "points_earned": p.points_earned,
+            "created_at": created.isoformat() if created else None,
+        })
+
+    audit_logs = (
+        db.query(PredictionAuditLog)
+        .filter(PredictionAuditLog.prediction_type == "bonus")
+        .order_by(PredictionAuditLog.created_at)
+        .all()
+    )
+
+    violations = []
+    all_bonus_actions = []
+    for log in audit_logs:
+        user = users_map.get(log.user_id)
+        log_time = log.created_at
+        if log_time and log_time.tzinfo is None:
+            log_time = log_time.replace(tzinfo=timezone.utc)
+
+        entry = {
+            "username": user.username if user else "?",
+            "full_name": user.full_name if user else "?",
+            "action": log.action,
+            "old_values": log.old_values,
+            "new_values": log.new_values,
+            "ip_address": log.ip_address,
+            "created_at": log_time.isoformat() if log_time else None,
+            "after_deadline": bool(log_time and log_time >= lock_time),
+        }
+        all_bonus_actions.append(entry)
+        if log_time and log_time >= lock_time:
+            violations.append(entry)
+
+    return {
+        "lock_time": lock_time.isoformat(),
+        "first_knockout_match": first_knockout.match_number,
+        "total_bonus_predictions": len(preds),
+        "total_bonus_audit_entries": len(audit_logs),
+        "violations_count": len(violations),
+        "violations": violations,
+        "predictions": predictions_data,
+        "audit_log": all_bonus_actions,
+    }

@@ -136,5 +136,6 @@ export const getGroupStandings = () => api.get("/matches/standings/");
 // Audit
 export const getAuditLog = (userId?: number) =>
   api.get("/predictions/audit-log", { params: userId ? { user_id: userId } : {} });
+export const getBonusAudit = () => api.get("/predictions/bonus-audit");
 
 export default api;

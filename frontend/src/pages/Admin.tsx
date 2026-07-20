@@ -15,6 +15,7 @@ import {
   autoGenerateNext,
   setBonusResult,
   getBonusPredictionsSummary,
+  getBonusAudit,
   getTeams,
   getAuditLog,
 } from "../services/api";
@@ -96,6 +97,8 @@ export default function Admin() {
   const [bonusMsg, setBonusMsg] = useState("");
   const [bonusSummary, setBonusSummary] = useState<Record<string, any[]>>({});
   const [bonusSummaryVisible, setBonusSummaryVisible] = useState<Record<string, boolean>>({});
+  const [bonusAuditData, setBonusAuditData] = useState<any>(null);
+  const [bonusAuditVisible, setBonusAuditVisible] = useState(false);
 
   // Audit log
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -543,6 +546,64 @@ export default function Admin() {
             </div>
           ))}
         </div>
+
+        <div style={{ marginTop: "1rem" }}>
+          <button
+            className="btn btn-sm"
+            onClick={async () => {
+              if (bonusAuditVisible) {
+                setBonusAuditVisible(false);
+                return;
+              }
+              try {
+                const res = await getBonusAudit();
+                setBonusAuditData(res.data);
+                setBonusAuditVisible(true);
+              } catch {
+                setBonusMsg("Error al cargar auditoría bonus");
+              }
+            }}
+          >
+            {bonusAuditVisible ? "Ocultar Auditoría" : "Auditar Bonus"}
+          </button>
+        </div>
+
+        {bonusAuditVisible && bonusAuditData && (
+          <div style={{ marginTop: "1rem", padding: "1rem", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "0.85rem" }}>
+            <div style={{ marginBottom: "0.5rem" }}>
+              <strong>Bloqueo:</strong> {bonusAuditData.lock_time ? new Date(bonusAuditData.lock_time).toLocaleString("es-CO", { timeZone: "America/Bogota" }) : "N/A"} (1h antes del primer partido eliminatorio #{bonusAuditData.first_knockout_match})
+            </div>
+            <div style={{ marginBottom: "0.5rem" }}>
+              <strong>Total predicciones:</strong> {bonusAuditData.total_bonus_predictions} | <strong>Acciones registradas:</strong> {bonusAuditData.total_bonus_audit_entries}
+            </div>
+
+            {bonusAuditData.violations_count > 0 ? (
+              <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "4px", padding: "0.5rem", marginBottom: "0.5rem" }}>
+                <strong style={{ color: "#dc2626" }}>ALERTA: {bonusAuditData.violations_count} cambio(s) fuera de tiempo</strong>
+                {bonusAuditData.violations.map((v: any, i: number) => (
+                  <div key={i} style={{ padding: "4px 0", borderBottom: "1px solid #fecaca" }}>
+                    {new Date(v.created_at).toLocaleString("es-CO", { timeZone: "America/Bogota" })} | {v.full_name} (@{v.username}) | {v.action} | {v.new_values} | IP: {v.ip_address}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: "4px", padding: "0.5rem", color: "#166534" }}>
+                Sin cambios fuera de tiempo. Todo en orden.
+              </div>
+            )}
+
+            <details style={{ marginTop: "0.5rem" }}>
+              <summary style={{ cursor: "pointer", fontWeight: 500 }}>Ver historial completo ({bonusAuditData.audit_log?.length || 0} acciones)</summary>
+              <div style={{ maxHeight: "200px", overflowY: "auto", marginTop: "0.5rem" }}>
+                {(bonusAuditData.audit_log || []).map((a: any, i: number) => (
+                  <div key={i} style={{ padding: "3px 0", borderBottom: "1px solid #f3f4f6", color: a.after_deadline ? "#dc2626" : "inherit" }}>
+                    {a.created_at ? new Date(a.created_at).toLocaleString("es-CO", { timeZone: "America/Bogota" }) : "?"} | {a.full_name} | {a.action} | {a.new_values} {a.after_deadline ? "⚠ FUERA DE TIEMPO" : ""}
+                  </div>
+                ))}
+              </div>
+            </details>
+          </div>
+        )}
       </div>
 
       {/* === PASSWORD RESET SECTION === */}
