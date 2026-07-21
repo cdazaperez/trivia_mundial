@@ -516,73 +516,80 @@ export default function Admin() {
                   style={{ width: "100%", padding: "0.4rem", marginBottom: "0.5rem", boxSizing: "border-box" }}
                 />
               )}
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={() => handleSaveBonusResult(bonus.key)}
-              >
-                Guardar resultado
-              </button>
-              <button
-                className="btn btn-sm"
-                style={{ marginLeft: "0.5rem", fontSize: "0.75rem" }}
-                onClick={() => handleToggleBonusSummary(bonus.key)}
-              >
-                {bonusSummaryVisible[bonus.key] ? "Ocultar" : "Ver respuestas"}
-              </button>
-              {bonusSummaryVisible[bonus.key] && bonusSummary[bonus.key] && (
-                <div style={{ marginTop: "0.5rem", fontSize: "0.8rem", maxHeight: "250px", overflowY: "auto", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "6px", padding: "0.5rem" }}>
-                  {bonusSummary[bonus.key].length === 0 ? (
-                    <div style={{ color: "#9ca3af" }}>Sin respuestas</div>
-                  ) : (
-                    <>
-                      <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "2px solid #e5e7eb", fontWeight: 700, fontSize: "0.75rem", color: "#6b7280" }}>
-                        <span>Participante</span>
-                        <span style={{ display: "flex", gap: "1rem" }}>
-                          <span style={{ minWidth: "100px", textAlign: "left" }}>Apuesta</span>
-                          <span style={{ minWidth: "40px", textAlign: "center" }}>Pts</span>
-                        </span>
-                      </div>
-                      {bonusSummary[bonus.key].map((p: any, i: number) => {
-                        const teamName = p.team_id ? teams.find((t) => t.id === p.team_id) : null;
-                        const prediction = p.player_name || (teamName ? `${teamName.flag_emoji} ${teamName.name}` : (p.team_id ? `Equipo #${p.team_id}` : "—"));
-                        return (
-                          <div key={i} style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "4px 0",
-                            borderBottom: "1px solid #f3f4f6",
-                            background: p.points_earned > 0 ? "#f0fdf4" : "transparent",
-                          }}>
-                            <span>{p.full_name || p.username}</span>
-                            <span style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                              <span style={{ minWidth: "100px", textAlign: "left", fontWeight: 500 }}>{prediction}</span>
-                              <span style={{
-                                minWidth: "40px",
-                                textAlign: "center",
-                                fontWeight: 700,
-                                padding: "1px 6px",
-                                borderRadius: "10px",
-                                fontSize: "0.75rem",
-                                background: p.points_earned > 0 ? "#dcfce7" : "#f3f4f6",
-                                color: p.points_earned > 0 ? "#166534" : "#9ca3af",
-                              }}>
-                                {p.points_earned > 0 ? `+${p.points_earned}` : "0"}
-                              </span>
-                            </span>
-                          </div>
-                        );
-                      })}
-                      <div style={{ marginTop: "0.5rem", padding: "4px 0", fontSize: "0.75rem", color: "#6b7280", borderTop: "2px solid #e5e7eb" }}>
-                        Acertaron: {bonusSummary[bonus.key].filter((p: any) => p.points_earned > 0).length} / {bonusSummary[bonus.key].length} participantes
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={() => handleSaveBonusResult(bonus.key)}
+                >
+                  Guardar resultado
+                </button>
+                <button
+                  className="btn btn-sm"
+                  style={{ fontSize: "0.75rem", background: "#6366f1", color: "white" }}
+                  onClick={() => handleToggleBonusSummary(bonus.key)}
+                >
+                  {bonusSummaryVisible[bonus.key] ? "Ocultar respuestas" : "Ver respuestas y puntos"}
+                </button>
+              </div>
             </div>
           ))}
         </div>
+
+        {/* Bonus summary tables - full width below cards */}
+        {["champion", "runner_up", "top_scorer", "mvp"].map((bonusKey) => {
+          const labels: Record<string, string> = { champion: "Campeón", runner_up: "Subcampeón", top_scorer: "Goleador", mvp: "MVP" };
+          const pts: Record<string, number> = { champion: 10, runner_up: 5, top_scorer: 5, mvp: 5 };
+          if (!bonusSummaryVisible[bonusKey] || !bonusSummary[bonusKey]) return null;
+          return (
+            <div key={bonusKey} style={{ marginTop: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>
+              <div style={{ background: "#6366f1", color: "white", padding: "0.5rem 1rem", fontWeight: 600, fontSize: "0.9rem" }}>
+                {labels[bonusKey]} (+{pts[bonusKey]} pts) — Respuestas de participantes
+              </div>
+              <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
+                  <thead>
+                    <tr style={{ background: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
+                      <th style={{ padding: "0.5rem 1rem", textAlign: "left" }}>Participante</th>
+                      <th style={{ padding: "0.5rem 1rem", textAlign: "left" }}>Apuesta</th>
+                      <th style={{ padding: "0.5rem 1rem", textAlign: "center", width: "80px" }}>Puntos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bonusSummary[bonusKey].map((p: any, i: number) => {
+                      const teamInfo = p.team_id ? teams.find((t) => t.id === p.team_id) : null;
+                      const prediction = p.player_name || (teamInfo ? `${teamInfo.flag_emoji} ${teamInfo.name}` : (p.team_id ? `Equipo #${p.team_id}` : "—"));
+                      return (
+                        <tr key={i} style={{
+                          borderBottom: "1px solid #f3f4f6",
+                          background: p.points_earned > 0 ? "#f0fdf4" : "transparent",
+                        }}>
+                          <td style={{ padding: "0.4rem 1rem" }}>{p.full_name || p.username}</td>
+                          <td style={{ padding: "0.4rem 1rem", fontWeight: 500 }}>{prediction}</td>
+                          <td style={{ padding: "0.4rem 1rem", textAlign: "center" }}>
+                            <span style={{
+                              display: "inline-block",
+                              padding: "2px 10px",
+                              borderRadius: "12px",
+                              fontWeight: 700,
+                              fontSize: "0.8rem",
+                              background: p.points_earned > 0 ? "#dcfce7" : "#f3f4f6",
+                              color: p.points_earned > 0 ? "#166534" : "#9ca3af",
+                            }}>
+                              {p.points_earned > 0 ? `+${p.points_earned}` : "0"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ padding: "0.5rem 1rem", background: "#f9fafb", borderTop: "2px solid #e5e7eb", fontSize: "0.8rem", color: "#6b7280" }}>
+                Acertaron: <strong>{bonusSummary[bonusKey].filter((p: any) => p.points_earned > 0).length}</strong> / {bonusSummary[bonusKey].length} participantes
+              </div>
+            </div>
+          );
+        })}
 
         <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#eff6ff", border: "2px solid #3b82f6", borderRadius: "8px" }}>
           <button
