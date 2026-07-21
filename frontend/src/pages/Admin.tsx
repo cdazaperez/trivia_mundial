@@ -530,16 +530,53 @@ export default function Admin() {
                 {bonusSummaryVisible[bonus.key] ? "Ocultar" : "Ver respuestas"}
               </button>
               {bonusSummaryVisible[bonus.key] && bonusSummary[bonus.key] && (
-                <div style={{ marginTop: "0.5rem", fontSize: "0.8rem", maxHeight: "150px", overflowY: "auto", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "4px", padding: "0.4rem" }}>
+                <div style={{ marginTop: "0.5rem", fontSize: "0.8rem", maxHeight: "250px", overflowY: "auto", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "6px", padding: "0.5rem" }}>
                   {bonusSummary[bonus.key].length === 0 ? (
                     <div style={{ color: "#9ca3af" }}>Sin respuestas</div>
                   ) : (
-                    bonusSummary[bonus.key].map((p: any, i: number) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "2px 0", borderBottom: "1px solid #f3f4f6" }}>
-                        <span>{p.full_name || p.username}</span>
-                        <span style={{ fontWeight: 500 }}>{p.player_name || `Equipo #${p.team_id}`}</span>
+                    <>
+                      <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "2px solid #e5e7eb", fontWeight: 700, fontSize: "0.75rem", color: "#6b7280" }}>
+                        <span>Participante</span>
+                        <span style={{ display: "flex", gap: "1rem" }}>
+                          <span style={{ minWidth: "100px", textAlign: "left" }}>Apuesta</span>
+                          <span style={{ minWidth: "40px", textAlign: "center" }}>Pts</span>
+                        </span>
                       </div>
-                    ))
+                      {bonusSummary[bonus.key].map((p: any, i: number) => {
+                        const teamName = p.team_id ? teams.find((t) => t.id === p.team_id) : null;
+                        const prediction = p.player_name || (teamName ? `${teamName.flag_emoji} ${teamName.name}` : (p.team_id ? `Equipo #${p.team_id}` : "—"));
+                        return (
+                          <div key={i} style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "4px 0",
+                            borderBottom: "1px solid #f3f4f6",
+                            background: p.points_earned > 0 ? "#f0fdf4" : "transparent",
+                          }}>
+                            <span>{p.full_name || p.username}</span>
+                            <span style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                              <span style={{ minWidth: "100px", textAlign: "left", fontWeight: 500 }}>{prediction}</span>
+                              <span style={{
+                                minWidth: "40px",
+                                textAlign: "center",
+                                fontWeight: 700,
+                                padding: "1px 6px",
+                                borderRadius: "10px",
+                                fontSize: "0.75rem",
+                                background: p.points_earned > 0 ? "#dcfce7" : "#f3f4f6",
+                                color: p.points_earned > 0 ? "#166534" : "#9ca3af",
+                              }}>
+                                {p.points_earned > 0 ? `+${p.points_earned}` : "0"}
+                              </span>
+                            </span>
+                          </div>
+                        );
+                      })}
+                      <div style={{ marginTop: "0.5rem", padding: "4px 0", fontSize: "0.75rem", color: "#6b7280", borderTop: "2px solid #e5e7eb" }}>
+                        Acertaron: {bonusSummary[bonus.key].filter((p: any) => p.points_earned > 0).length} / {bonusSummary[bonus.key].length} participantes
+                      </div>
+                    </>
                   )}
                 </div>
               )}
