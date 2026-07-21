@@ -200,6 +200,35 @@ def get_all_teams(db: Session = Depends(get_db), _current_user: User = Depends(g
     ]
 
 
+@router.get("/bonus-predictions-summary")
+def get_bonus_predictions_summary(
+    prediction_type: str,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Get all user submissions for a bonus type so admin can see what they wrote."""
+    valid_types = ["champion", "runner_up", "top_scorer", "mvp"]
+    if prediction_type not in valid_types:
+        raise HTTPException(status_code=400, detail=f"Tipo inválido. Opciones: {', '.join(valid_types)}")
+
+    predictions = db.query(BonusPrediction).filter(
+        BonusPrediction.prediction_type == prediction_type
+    ).all()
+
+    users_map = {u.id: u for u in db.query(User).all()}
+
+    return [
+        {
+            "username": users_map[p.user_id].username if p.user_id in users_map else "?",
+            "full_name": users_map[p.user_id].full_name if p.user_id in users_map else "?",
+            "team_id": p.team_id,
+            "player_name": p.player_name,
+            "points_earned": p.points_earned,
+        }
+        for p in predictions
+    ]
+
+
 @router.get("/{match_id}", response_model=MatchResponse)
 def get_match(match_id: int, db: Session = Depends(get_db), _current_user: User = Depends(get_current_user)):
     match = db.query(Match).options(
@@ -314,38 +343,6 @@ def set_bonus_result(
         player_name=data.player_name,
     )
     return {"detail": f"Bonus '{data.prediction_type}' calculado. {updated} acertaron."}
-
-
-@router.get("/bonus-predictions-summary")
-def get_bonus_predictions_summary(
-    prediction_type: str,
-    db: Session = Depends(get_db),
-    _admin: User = Depends(get_admin_user),
-):
-    """Get all user submissions for a bonus type so admin can see what they wrote."""
-    from app.models.tournament import BonusPrediction
-    from app.models.user import User as UserModel
-
-    valid_types = ["champion", "runner_up", "top_scorer", "mvp"]
-    if prediction_type not in valid_types:
-        raise HTTPException(status_code=400, detail=f"Tipo inválido. Opciones: {', '.join(valid_types)}")
-
-    predictions = db.query(BonusPrediction).filter(
-        BonusPrediction.prediction_type == prediction_type
-    ).all()
-
-    users_map = {u.id: u for u in db.query(UserModel).all()}
-
-    return [
-        {
-            "username": users_map[p.user_id].username if p.user_id in users_map else "?",
-            "full_name": users_map[p.user_id].full_name if p.user_id in users_map else "?",
-            "team_id": p.team_id,
-            "player_name": p.player_name,
-            "points_earned": p.points_earned,
-        }
-        for p in predictions
-    ]
 
 
 @router.post("/reset-all")

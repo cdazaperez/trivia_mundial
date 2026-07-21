@@ -79,6 +79,7 @@ def startup():
         seed_all(db)
         _fix_match_dates(db)
         _fix_knockout_schedule(db)
+        _set_bonus_results(db)
     finally:
         db.close()
 
@@ -178,6 +179,22 @@ def _fix_knockout_schedule(db):
 
     if updated:
         db.commit()
+
+
+def _set_bonus_results(db):
+    """Set bonus results: Champion=España, Runner-up=Argentina, Top Scorer=Mbappe, MVP=Rodrigo."""
+    from app.models.tournament import Team
+    from app.services.scoring import calculate_bonus_prediction_points
+
+    spain = db.query(Team).filter(Team.code == "ESP").first()
+    argentina = db.query(Team).filter(Team.code == "ARG").first()
+
+    if spain:
+        calculate_bonus_prediction_points(db, "champion", team_id=spain.id)
+    if argentina:
+        calculate_bonus_prediction_points(db, "runner_up", team_id=argentina.id)
+    calculate_bonus_prediction_points(db, "top_scorer", player_name="Mbappe")
+    calculate_bonus_prediction_points(db, "mvp", player_name="Rodrigo")
 
 
 @app.get("/api/health")
